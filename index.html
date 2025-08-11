@@ -1126,6 +1126,30 @@
             background: transparent;
         }
 
+        .lego-color-button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .lego-color-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .lego-color-button:active {
+            transform: translateY(0);
+        }
+
         .color-code-input {
             width: 90px;
             height: 32px;
@@ -1958,8 +1982,13 @@
                             <label class="form-label">글자 색상</label>
                             <div class="color-group">
                                 <div class="color-picker-wrapper">
-                                    <input type="color" class="color-picker" id="textColor" value="#212529" 
-                                           onchange="applyFormat('color', this.value); updateColorCode('text', this.value)">
+                                    <button id="textColorButton" class="lego-color-button" 
+                                            onclick="openTextColorPicker()"
+                                            style="background: #212529; 
+                                                   box-shadow: 0 2px 0 0 #191c1f, 0 4px 0 0 #0f1113, 0 4px 8px rgba(0,0,0,0.2);">
+                                        🎨
+                                    </button>
+                                    <input type="hidden" id="textColor" value="#212529">
                                     <input type="text" class="color-code-input" id="textColorCode" value="#212529" 
                                            placeholder="#000000"
                                            onchange="updateColorFromCode('text', this.value)">
@@ -3122,6 +3151,24 @@
             if (valueDisplay) {
                 valueDisplay.textContent = color.toUpperCase();
             }
+            
+            // Update LEGO button color if it exists
+            const colorButton = document.getElementById(type + 'ColorButton');
+            if (colorButton) {
+                colorButton.style.background = color;
+                const darker1 = adjustColor(color, -30);
+                const darker2 = adjustColor(color, -50);
+                colorButton.style.boxShadow = `0 2px 0 0 ${darker1}, 0 4px 0 0 ${darker2}, 0 4px 8px rgba(0,0,0,0.2)`;
+            }
+        }
+        
+        // Helper function to adjust color brightness
+        function adjustColor(color, amount) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+            const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+            const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+            return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
         }
 
         // Update color picker when code is entered
@@ -3534,6 +3581,276 @@
             showToast('도형이 삭제되었습니다');
         }
         
+        // Open text color picker dialog
+        function openTextColorPicker() {
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+
+            // Create dialog
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                background: white;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                max-width: 90%;
+                width: 480px;
+                max-height: 90vh;
+                overflow-y: auto;
+            `;
+
+            // Title
+            const title = document.createElement('h3');
+            title.textContent = '텍스트 색상 선택';
+            title.style.cssText = `
+                margin: 0 0 20px 0;
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+            `;
+            dialog.appendChild(title);
+
+            // Color grid
+            const colorGrid = document.createElement('div');
+            colorGrid.style.cssText = `
+                display: grid;
+                grid-template-columns: repeat(8, 1fr);
+                gap: 10px;
+                margin-bottom: 20px;
+            `;
+
+            // LEGO-style color blocks
+            const legoColors = [
+                // Basic colors
+                { color: '#FF0000', name: '빨강' },
+                { color: '#FF6B00', name: '주황' },
+                { color: '#FFD700', name: '노랑' },
+                { color: '#00FF00', name: '초록' },
+                { color: '#00CED1', name: '청록' },
+                { color: '#0000FF', name: '파랑' },
+                { color: '#4B0082', name: '남색' },
+                { color: '#9400D3', name: '보라' },
+                
+                // Pastel colors
+                { color: '#FFB6C1', name: '연분홍' },
+                { color: '#FFA07A', name: '연살구' },
+                { color: '#FFFFE0', name: '연노랑' },
+                { color: '#98FB98', name: '연초록' },
+                { color: '#AFEEEE', name: '연하늘' },
+                { color: '#ADD8E6', name: '연파랑' },
+                { color: '#DDA0DD', name: '연보라' },
+                { color: '#F0E68C', name: '카키' },
+                
+                // Dark colors
+                { color: '#8B0000', name: '진빨강' },
+                { color: '#FF8C00', name: '진주황' },
+                { color: '#808000', name: '올리브' },
+                { color: '#006400', name: '진초록' },
+                { color: '#008B8B', name: '진청록' },
+                { color: '#000080', name: '진파랑' },
+                { color: '#4B0082', name: '인디고' },
+                { color: '#800080', name: '진보라' },
+                
+                // Neutral colors
+                { color: '#000000', name: '검정' },
+                { color: '#696969', name: '진회색' },
+                { color: '#808080', name: '회색' },
+                { color: '#A9A9A9', name: '연회색' },
+                { color: '#C0C0C0', name: '은색' },
+                { color: '#D3D3D3', name: '밝은회색' },
+                { color: '#DCDCDC', name: '게인즈버러' },
+                { color: '#FFFFFF', name: '흰색' }
+            ];
+
+            legoColors.forEach(colorInfo => {
+                const block = document.createElement('div');
+                const color = colorInfo.color;
+                
+                // 3D LEGO block effect
+                block.style.cssText = `
+                    width: 100%;
+                    aspect-ratio: 1;
+                    background: ${color};
+                    border-radius: 6px;
+                    cursor: pointer;
+                    position: relative;
+                    transition: all 0.2s;
+                    box-shadow: 
+                        0 2px 0 0 ${adjustColor(color, -30)},
+                        0 4px 0 0 ${adjustColor(color, -50)},
+                        0 4px 8px rgba(0,0,0,0.2);
+                    transform: translateY(0);
+                `;
+
+                // Hover effect
+                block.addEventListener('mouseenter', () => {
+                    block.style.transform = 'translateY(-2px)';
+                    block.style.boxShadow = `
+                        0 4px 0 0 ${adjustColor(color, -30)},
+                        0 6px 0 0 ${adjustColor(color, -50)},
+                        0 6px 12px rgba(0,0,0,0.3)
+                    `;
+                });
+
+                block.addEventListener('mouseleave', () => {
+                    block.style.transform = 'translateY(0)';
+                    block.style.boxShadow = `
+                        0 2px 0 0 ${adjustColor(color, -30)},
+                        0 4px 0 0 ${adjustColor(color, -50)},
+                        0 4px 8px rgba(0,0,0,0.2)
+                    `;
+                });
+
+                // Click event
+                block.addEventListener('click', () => {
+                    // Update text color button background
+                    const textColorButton = document.getElementById('textColorButton');
+                    if (textColorButton) {
+                        textColorButton.style.background = color;
+                        // Update button shadow with darker colors
+                        textColorButton.style.boxShadow = `
+                            0 2px 0 0 ${adjustColor(color, -30)},
+                            0 4px 0 0 ${adjustColor(color, -50)},
+                            0 4px 8px rgba(0,0,0,0.2)
+                        `;
+                    }
+                    // Update color code display
+                    const colorCode = document.getElementById('textColorCode');
+                    if (colorCode) {
+                        colorCode.value = color.toUpperCase();
+                    }
+                    const colorValue = document.getElementById('textColorValue');
+                    if (colorValue) {
+                        colorValue.textContent = color.toUpperCase();
+                    }
+                    // Apply color to text
+                    applyFormat('color', color);
+                    document.body.removeChild(overlay);
+                });
+
+                // Tooltip
+                block.title = colorInfo.name;
+
+                colorGrid.appendChild(block);
+            });
+
+            dialog.appendChild(colorGrid);
+
+            // Color code input
+            const inputContainer = document.createElement('div');
+            inputContainer.style.cssText = `
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+                align-items: center;
+            `;
+
+            const colorInput = document.createElement('input');
+            colorInput.type = 'text';
+            colorInput.value = document.getElementById('textColorCode')?.value || '#212529';
+            colorInput.placeholder = '#000000';
+            colorInput.style.cssText = `
+                flex: 1;
+                padding: 8px 12px;
+                border: 2px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                font-family: monospace;
+            `;
+
+            const applyButton = document.createElement('button');
+            applyButton.textContent = '적용';
+            applyButton.style.cssText = `
+                padding: 8px 20px;
+                background: #007AFF;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+            `;
+
+            applyButton.addEventListener('click', () => {
+                const color = colorInput.value;
+                if (/^#[0-9A-F]{6}$/i.test(color)) {
+                    // Update text color button background
+                    const textColorButton = document.getElementById('textColorButton');
+                    if (textColorButton) {
+                        textColorButton.style.background = color;
+                        textColorButton.style.boxShadow = `
+                            0 2px 0 0 ${adjustColor(color, -30)},
+                            0 4px 0 0 ${adjustColor(color, -50)},
+                            0 4px 8px rgba(0,0,0,0.2)
+                        `;
+                    }
+                    // Update color code display
+                    const colorCode = document.getElementById('textColorCode');
+                    if (colorCode) {
+                        colorCode.value = color.toUpperCase();
+                    }
+                    const colorValue = document.getElementById('textColorValue');
+                    if (colorValue) {
+                        colorValue.textContent = color.toUpperCase();
+                    }
+                    // Apply color to text
+                    applyFormat('color', color);
+                    document.body.removeChild(overlay);
+                } else {
+                    alert('올바른 색상 코드를 입력해주세요. (예: #FF0000)');
+                }
+            });
+
+            inputContainer.appendChild(colorInput);
+            inputContainer.appendChild(applyButton);
+            dialog.appendChild(inputContainer);
+
+            // Close button
+            const closeButton = document.createElement('button');
+            closeButton.textContent = '닫기';
+            closeButton.style.cssText = `
+                width: 100%;
+                padding: 10px;
+                background: #f0f0f0;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+            `;
+
+            closeButton.addEventListener('click', () => {
+                document.body.removeChild(overlay);
+            });
+
+            dialog.appendChild(closeButton);
+
+            // Overlay click to close
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    document.body.removeChild(overlay);
+                }
+            });
+
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+
+            // Focus on input
+            colorInput.focus();
+        }
+
         // Change shape color
         function changeShapeColor(btn) {
             const shape = btn.closest('.shape-element');
@@ -3557,30 +3874,166 @@
             const currentColor = shape.dataset.currentColor || '#6c757d';
             
             colorDialog.innerHTML = `
-                <h4 style="margin: 0 0 15px 0; font-size: 16px; color: var(--text-primary);">도형 색상 선택</h4>
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                    <input type="color" id="shapeColorPicker" value="${currentColor}" 
-                           style="width: 40px; height: 40px; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">
-                    <input type="text" id="shapeColorCode" value="${currentColor.toUpperCase()}" 
-                           placeholder="#000000"
-                           style="width: 100px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; 
-                                  background: var(--bg-secondary); color: var(--text-primary); font-family: monospace;">
+                <h4 style="margin: 0 0 15px 0; font-size: 16px; color: var(--text-primary);">🎨 Color Blocks</h4>
+                
+                <!-- LEGO-style color blocks -->
+                <div id="colorBlocks" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-bottom: 20px;">
+                    <!-- Will be populated by JavaScript -->
                 </div>
+                
+                <!-- Custom color section -->
+                <div style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <div style="position: relative;">
+                            <input type="color" id="shapeColorPicker" value="${currentColor}" 
+                                   style="width: 50px; height: 50px; border: none; border-radius: 8px; cursor: pointer; 
+                                          box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                            <div style="position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; 
+                                        background: white; border-radius: 50%; display: flex; align-items: center; 
+                                        justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                <span style="font-size: 12px;">✎</span>
+                            </div>
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="text" id="shapeColorCode" value="${currentColor.toUpperCase()}" 
+                                   placeholder="#000000"
+                                   style="width: 100%; padding: 10px; border: 2px solid var(--border-color); 
+                                          border-radius: 8px; background: var(--bg-secondary); 
+                                          color: var(--text-primary); font-family: monospace; font-size: 14px;
+                                          transition: border-color 0.2s;">
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                                직접 색상 코드 입력
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button onclick="this.closest('.color-dialog').remove()" 
-                            style="padding: 6px 16px; background: var(--bg-secondary); color: var(--text-primary); 
-                                   border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">
+                            style="padding: 8px 20px; background: var(--bg-secondary); color: var(--text-primary); 
+                                   border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;
+                                   font-weight: 500; transition: all 0.2s;">
                         취소
                     </button>
                     <button id="applyShapeColor"
-                            style="padding: 6px 16px; background: var(--primary); color: white; 
-                                   border: none; border-radius: 4px; cursor: pointer;">
+                            style="padding: 8px 20px; background: var(--primary); color: white; 
+                                   border: none; border-radius: 8px; cursor: pointer; font-weight: 500;
+                                   box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3); transition: all 0.2s;">
                         적용
                     </button>
                 </div>
             `;
             
             document.body.appendChild(colorDialog);
+            
+            // Define LEGO-style color palette
+            const legoColors = [
+                // First row - Basic colors
+                { color: '#FF0000', name: '빨강' },
+                { color: '#FF6B00', name: '주황' },
+                { color: '#FFD600', name: '노랑' },
+                { color: '#00D600', name: '초록' },
+                { color: '#0096FF', name: '파랑' },
+                { color: '#0047AB', name: '남색' },
+                { color: '#8B00FF', name: '보라' },
+                { color: '#FF1493', name: '분홍' },
+                
+                // Second row - Pastel colors
+                { color: '#FFB3BA', name: '연분홍' },
+                { color: '#FFDFBA', name: '연주황' },
+                { color: '#FFFFBA', name: '연노랑' },
+                { color: '#BAFFC9', name: '연초록' },
+                { color: '#BAE1FF', name: '연파랑' },
+                { color: '#C9BAFF', name: '연보라' },
+                { color: '#E0BBE4', name: '라벤더' },
+                { color: '#FFC0CB', name: '핑크' },
+                
+                // Third row - Dark colors
+                { color: '#8B0000', name: '진빨강' },
+                { color: '#FF8C00', name: '진주황' },
+                { color: '#FFD700', name: '금색' },
+                { color: '#228B22', name: '진초록' },
+                { color: '#000080', name: '네이비' },
+                { color: '#4B0082', name: '인디고' },
+                { color: '#800080', name: '자주' },
+                { color: '#DC143C', name: '크림슨' },
+                
+                // Fourth row - Neutral colors
+                { color: '#000000', name: '검정' },
+                { color: '#2F2F2F', name: '진회색' },
+                { color: '#696969', name: '회색' },
+                { color: '#A9A9A9', name: '밝은회색' },
+                { color: '#D3D3D3', name: '연회색' },
+                { color: '#FFFFFF', name: '흰색' },
+                { color: '#8B4513', name: '갈색' },
+                { color: '#D2691E', name: '초콜릿' }
+            ];
+            
+            // Populate color blocks
+            const colorBlocksContainer = document.getElementById('colorBlocks');
+            legoColors.forEach(({ color, name }) => {
+                const block = document.createElement('div');
+                block.style.cssText = `
+                    width: 100%;
+                    aspect-ratio: 1;
+                    background: ${color};
+                    border-radius: 6px;
+                    cursor: pointer;
+                    position: relative;
+                    transition: all 0.2s;
+                    box-shadow: 
+                        0 2px 0 0 ${adjustColor(color, -30)},
+                        0 4px 0 0 ${adjustColor(color, -50)},
+                        0 4px 8px rgba(0,0,0,0.2);
+                    transform: translateY(0);
+                `;
+                
+                // Add hover effect
+                block.onmouseenter = function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = `
+                        0 4px 0 0 ${adjustColor(color, -30)},
+                        0 6px 0 0 ${adjustColor(color, -50)},
+                        0 6px 12px rgba(0,0,0,0.3)
+                    `;
+                };
+                
+                block.onmouseleave = function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = `
+                        0 2px 0 0 ${adjustColor(color, -30)},
+                        0 4px 0 0 ${adjustColor(color, -50)},
+                        0 4px 8px rgba(0,0,0,0.2)
+                    `;
+                };
+                
+                // Add click handler
+                block.onclick = function() {
+                    picker.value = color;
+                    codeInput.value = color.toUpperCase();
+                    
+                    // Add selection effect
+                    document.querySelectorAll('#colorBlocks > div').forEach(b => {
+                        b.style.outline = 'none';
+                    });
+                    this.style.outline = '3px solid var(--primary)';
+                    this.style.outlineOffset = '2px';
+                };
+                
+                // Add tooltip
+                block.title = name;
+                
+                colorBlocksContainer.appendChild(block);
+            });
+            
+            // Helper function to adjust color brightness
+            function adjustColor(color, amount) {
+                const num = parseInt(color.replace('#', ''), 16);
+                const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+                const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+                const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+                return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+            }
             
             const picker = document.getElementById('shapeColorPicker');
             const codeInput = document.getElementById('shapeColorCode');
