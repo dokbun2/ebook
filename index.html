@@ -1,0 +1,3146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전자책 에디터 - Miricanvas Style</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poor+Story&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Stylish&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Single+Day&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Hi+Melody&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Sunflower:wght@300;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cute+Font&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap');
+        
+        /* Paperlogy Local Fonts */
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-1Thin.woff') format('woff');
+            font-weight: 100;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-2ExtraLight.woff') format('woff');
+            font-weight: 200;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-3Light.woff') format('woff');
+            font-weight: 300;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-4Regular.woff') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-5Medium.woff') format('woff');
+            font-weight: 500;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-6SemiBold.woff') format('woff');
+            font-weight: 600;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-7Bold.woff') format('woff');
+            font-weight: 700;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-8ExtraBold.woff') format('woff');
+            font-weight: 800;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Paperlogy';
+            src: url('./fonts/Paperlogy-9Black.woff') format('woff');
+            font-weight: 900;
+            font-style: normal;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #f0f2f5;
+            --bg-sidebar: #2c3e50;
+            
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-tertiary: #adb5bd;
+            --text-white: #ffffff;
+            
+            --border-color: #dee2e6;
+            --border-light: #e9ecef;
+            
+            --accent-primary: #00d4ff;
+            --accent-hover: #00b8e6;
+            --accent-active: #0099cc;
+            
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--text-secondary);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            padding-top: 56px;
+        }
+
+        /* Left Icon Sidebar */
+        .icon-sidebar {
+            width: 56px;
+            background: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 0;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .icon-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--accent-primary);
+        }
+
+        .icon-btn i {
+            font-size: 18px;
+        }
+
+        .icon-tooltip {
+            position: absolute;
+            left: 100%;
+            margin-left: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .icon-btn:hover .icon-tooltip {
+            opacity: 1;
+        }
+
+        /* Tool Sidebar */
+        .tool-sidebar {
+            width: 280px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .sidebar-section {
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .section-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+        }
+
+        .section-header:hover {
+            background: var(--bg-secondary);
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .section-toggle {
+            color: var(--text-secondary);
+            transition: transform 0.2s;
+        }
+
+        .section-header.collapsed .section-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 12px 16px;
+            transition: max-height 0.3s ease;
+            overflow: hidden;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+            padding: 0 16px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 6px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: white;
+        }
+
+        /* Text Formatting Toolbar */
+        .format-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 12px;
+        }
+
+        .format-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .format-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .format-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .format-separator {
+            width: 1px;
+            background: var(--border-light);
+            margin: 0 4px;
+        }
+
+        /* Font Size Control */
+        .font-size-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .font-size-input {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .font-size-buttons {
+            display: flex;
+            gap: 2px;
+        }
+
+        .font-size-btn {
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .font-size-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        /* Alignment Buttons */
+        .alignment-group {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 12px;
+        }
+
+        .align-btn {
+            flex: 1;
+            height: 32px;
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .align-btn:first-child {
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+        }
+
+        .align-btn:last-child {
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .align-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .align-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        /* Color Picker */
+        .color-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+            width: 32px;
+            height: 32px;
+        }
+
+        .color-picker {
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background: transparent;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 2px;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 2px;
+        }
+
+        /* Editor Area */
+        .editor-container {
+            flex: 1;
+            background: var(--bg-tertiary);
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .editor-wrapper {
+            width: 100%;
+            max-width: 816px; /* A4 width at 96 DPI */
+        }
+
+        .page {
+            background: white;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 24px;
+            padding: 40px 60px;
+            min-height: 1056px; /* A4 height at 96 DPI */
+            border-radius: var(--radius-sm);
+            position: relative;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            color: var(--text-tertiary);
+            font-size: 12px;
+        }
+
+        .editor-content {
+            min-height: 900px;
+            outline: none;
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .editor-content h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .editor-content h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 20px 0 12px;
+            color: var(--text-primary);
+        }
+
+        .editor-content p {
+            margin-bottom: 12px;
+        }
+
+        /* Add Page Button */
+        .add-page-btn {
+            width: 100%;
+            padding: 32px;
+            background: white;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .add-page-btn:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-secondary);
+        }
+
+        .add-page-icon {
+            font-size: 32px;
+            color: var(--accent-primary);
+        }
+
+        /* Image Upload Area */
+        .image-upload-area {
+            background: var(--accent-primary);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .image-upload-area:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .image-upload-area:active {
+            transform: translateY(0);
+        }
+
+        .image-upload-area.dragover {
+            background: var(--accent-active);
+            box-shadow: 0 4px 16px rgba(0, 212, 255, 0.4);
+        }
+
+        .upload-icon {
+            font-size: 28px;
+            color: white;
+            margin-bottom: 6px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* Image Gallery */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            cursor: grab;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover {
+            border-color: var(--accent-primary);
+            transform: scale(1.05);
+        }
+
+        .gallery-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .gallery-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        /* Image Container */
+        .image-container {
+            position: absolute;
+            display: inline-block;
+            margin: 0;
+            border-radius: var(--radius-sm);
+            overflow: visible;
+            user-select: none;
+            cursor: move;
+            z-index: 1;
+        }
+        
+        .image-container.dragging {
+            opacity: 0.8;
+            z-index: 1000;
+        }
+
+        .image-container:hover .image-controls,
+        .image-container.selected .image-controls {
+            opacity: 1;
+        }
+
+        .image-container.selected {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
+        .inserted-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            cursor: move;
+            pointer-events: none;
+        }
+
+        /* Image Resize Handles */
+        .resize-handles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            pointer-events: none;
+        }
+
+        .image-container.selected .resize-handles {
+            display: block;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-primary);
+            border: 2px solid white;
+            border-radius: 50%;
+            pointer-events: all;
+            cursor: nwse-resize;
+        }
+
+        .resize-handle.top-left {
+            top: -5px;
+            left: -5px;
+            cursor: nw-resize;
+        }
+
+        .resize-handle.top-right {
+            top: -5px;
+            right: -5px;
+            cursor: ne-resize;
+        }
+
+        .resize-handle.bottom-left {
+            bottom: -5px;
+            left: -5px;
+            cursor: sw-resize;
+        }
+
+        .resize-handle.bottom-right {
+            bottom: -5px;
+            right: -5px;
+            cursor: se-resize;
+        }
+
+        .resize-handle.top {
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: n-resize;
+        }
+
+        .resize-handle.right {
+            top: 50%;
+            right: -5px;
+            transform: translateY(-50%);
+            cursor: e-resize;
+        }
+
+        .resize-handle.bottom {
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: s-resize;
+        }
+
+        .resize-handle.left {
+            top: 50%;
+            left: -5px;
+            transform: translateY(-50%);
+            cursor: w-resize;
+        }
+
+        .image-controls {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .image-control-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .image-control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Rotation Handle */
+        .rotation-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-primary);
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: grab;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            z-index: 10;
+        }
+        
+        .rotation-handle::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: var(--accent-primary);
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .shape-element.selected .rotation-handle {
+            display: block;
+        }
+        
+        .rotation-handle:active {
+            cursor: grabbing;
+        }
+        
+        /* Shape Panel Styles */
+        .shape-categories {
+            display: flex;
+            gap: 0;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .shape-category-tab {
+            flex: 1;
+            padding: 8px 4px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+        
+        .shape-category-tab:hover {
+            color: var(--text-primary);
+        }
+        
+        .shape-category-tab.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+        
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .shape-item {
+            aspect-ratio: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .shape-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .shape-item svg {
+            width: 60%;
+            height: 60%;
+            fill: var(--text-secondary);
+            stroke: var(--text-secondary);
+            transition: var(--transition);
+        }
+        
+        .shape-item:hover svg {
+            fill: var(--accent-primary);
+            stroke: var(--accent-primary);
+        }
+        
+        .shape-item .shape-label {
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            color: var(--text-tertiary);
+        }
+        
+        /* Shape in Editor */
+        .shape-element {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+        }
+        
+        .shape-element.selected {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+        
+        .shape-element.dragging {
+            opacity: 0.8;
+            z-index: 1000;
+            cursor: grabbing !important;
+        }
+        
+        .shape-element:hover .image-controls,
+        .shape-element.selected .image-controls {
+            opacity: 1;
+        }
+        
+        .shape-element .resize-handles {
+            display: none;
+        }
+        
+        .shape-element.selected .resize-handles {
+            display: block;
+        }
+        
+        .shape-element svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .shape-element {
+            transform-origin: center center;
+        }
+        
+        /* Prevent shape squishing for lines */
+        .shape-element[data-shape-type*="line"] {
+            height: 20px !important;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .tool-sidebar {
+                position: absolute;
+                left: 56px;
+                height: calc(100vh - 56px);
+                z-index: 100;
+                box-shadow: var(--shadow-lg);
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .tool-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        /* File Input Hidden */
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-book"></i>
+                <span>전자책 에디터</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <input type="text" class="form-control" style="max-width: 300px;" placeholder="제목 없는 문서" id="documentTitle">
+        </div>
+        <div class="header-right">
+            <button class="btn btn-sm" onclick="saveDocument()">
+                <i class="fas fa-save"></i>
+                저장
+            </button>
+            <button class="btn btn-sm" onclick="openDocument()">
+                <i class="fas fa-folder-open"></i>
+                열기
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="exportToPDF()">
+                <i class="fas fa-file-pdf"></i>
+                PDF 내보내기
+            </button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Left Icon Sidebar -->
+        <div class="icon-sidebar">
+            <button class="icon-btn active" onclick="showPanel('text')" title="텍스트">
+                <i class="fas fa-font"></i>
+                <span class="icon-tooltip">텍스트</span>
+            </button>
+            <button class="icon-btn" onclick="showPanel('upload')" title="업로드">
+                <i class="fas fa-upload"></i>
+                <span class="icon-tooltip">업로드</span>
+            </button>
+            <button class="icon-btn" onclick="showPanel('elements')" title="요소">
+                <i class="fas fa-shapes"></i>
+                <span class="icon-tooltip">요소</span>
+            </button>
+            <button class="icon-btn" onclick="showPanel('pages')" title="페이지">
+                <i class="fas fa-file-alt"></i>
+                <span class="icon-tooltip">페이지</span>
+            </button>
+        </div>
+
+        <!-- Tool Sidebar -->
+        <div class="tool-sidebar" id="toolSidebar">
+            <div class="sidebar-header">텍스트</div>
+            
+            <!-- Text Panel -->
+            <div id="textPanel" class="panel">
+                <!-- 텍스트 서식 섹션 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="section-title">텍스트 서식</span>
+                        <i class="fas fa-chevron-down section-toggle"></i>
+                    </div>
+                    <div class="section-content">
+                        <!-- Format Toolbar -->
+                        <div class="format-toolbar">
+                            <button class="format-btn" onclick="toggleFormat('bold')" title="굵게">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button class="format-btn" onclick="toggleFormat('italic')" title="기울임">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button class="format-btn" onclick="toggleFormat('underline')" title="밑줄">
+                                <i class="fas fa-underline"></i>
+                            </button>
+                            <div class="format-separator"></div>
+                            <button class="format-btn" onclick="insertList('ul')" title="글머리 기호">
+                                <i class="fas fa-list-ul"></i>
+                            </button>
+                            <button class="format-btn" onclick="insertList('ol')" title="번호 매기기">
+                                <i class="fas fa-list-ol"></i>
+                            </button>
+                        </div>
+
+                        <!-- Font Family -->
+                        <div class="form-group">
+                            <label class="form-label">글꼴</label>
+                            <select class="form-control" id="fontFamily" onchange="applyFormat('fontFamily', this.value)">
+                                <optgroup label="기본 글꼴">
+                                    <option value="'Paperlogy', sans-serif">페이퍼로지 (Paperlogy)</option>
+                                    <option value="'Noto Sans KR', sans-serif">노토 산스 (Noto Sans KR)</option>
+                                    <option value="'Malgun Gothic', sans-serif">맑은 고딕</option>
+                                </optgroup>
+                                <optgroup label="나눔 글꼴">
+                                    <option value="'Nanum Gothic', sans-serif">나눔고딕</option>
+                                    <option value="'Nanum Myeongjo', serif">나눔명조</option>
+                                </optgroup>
+                                <optgroup label="제목용 글꼴">
+                                    <option value="'Black Han Sans', sans-serif">검은고딕 (Black Han Sans)</option>
+                                    <option value="'Jua', sans-serif">주아체</option>
+                                    <option value="'Do Hyeon', sans-serif">도현체</option>
+                                </optgroup>
+                                <optgroup label="본문용 글꼴">
+                                    <option value="'Gowun Dodum', sans-serif">고운돋움</option>
+                                    <option value="'Gowun Batang', serif">고운바탕</option>
+                                    <option value="'Sunflower', sans-serif">해바라기</option>
+                                </optgroup>
+                                <optgroup label="캐주얼 글꼴">
+                                    <option value="'Poor Story', sans-serif">가난한이야기</option>
+                                    <option value="'Stylish', sans-serif">스타일리시</option>
+                                    <option value="'Single Day', sans-serif">싱글데이</option>
+                                    <option value="'Hi Melody', sans-serif">하이멜로디</option>
+                                    <option value="'Cute Font', sans-serif">귀여운 글꼴</option>
+                                    <option value="'Gaegu', sans-serif">개구체</option>
+                                </optgroup>
+                                <optgroup label="영문 글꼴">
+                                    <option value="Arial, sans-serif">Arial</option>
+                                    <option value="Georgia, serif">Georgia</option>
+                                    <option value="'Times New Roman', serif">Times New Roman</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Font Size -->
+                        <div class="font-size-control">
+                            <input type="number" class="font-size-input" id="fontSize" value="16" min="8" max="144" 
+                                   onchange="applyFormat('fontSize', this.value + 'px')">
+                            <div class="font-size-buttons">
+                                <button class="font-size-btn" onclick="changeFontSize(-1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button class="font-size-btn" onclick="changeFontSize(1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Text Alignment -->
+                        <div class="alignment-group">
+                            <button class="align-btn active" onclick="setAlignment('left')" title="왼쪽 정렬">
+                                <i class="fas fa-align-left"></i>
+                            </button>
+                            <button class="align-btn" onclick="setAlignment('center')" title="가운데 정렬">
+                                <i class="fas fa-align-center"></i>
+                            </button>
+                            <button class="align-btn" onclick="setAlignment('right')" title="오른쪽 정렬">
+                                <i class="fas fa-align-right"></i>
+                            </button>
+                            <button class="align-btn" onclick="setAlignment('justify')" title="양쪽 정렬">
+                                <i class="fas fa-align-justify"></i>
+                            </button>
+                        </div>
+
+                        <!-- Text Color -->
+                        <div class="form-group">
+                            <label class="form-label">글자 색상</label>
+                            <div class="color-group">
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="color-picker" id="textColor" value="#212529" 
+                                           onchange="applyFormat('color', this.value)">
+                                </div>
+                                <span class="form-label" id="textColorValue">#212529</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 줄 간격 섹션 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="section-title">줄 간격</span>
+                        <i class="fas fa-chevron-down section-toggle"></i>
+                    </div>
+                    <div class="section-content">
+                        <select class="form-control" onchange="applyFormat('lineHeight', this.value)">
+                            <option value="1.2">1.2</option>
+                            <option value="1.5">1.5</option>
+                            <option value="1.8" selected>1.8</option>
+                            <option value="2.0">2.0</option>
+                            <option value="2.5">2.5</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Panel -->
+            <div id="uploadPanel" class="panel" style="display: none;">
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <span class="section-title">이미지 업로드</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="image-upload-area" onclick="document.getElementById('imageInput').click()"
+                             ondrop="handleDropToGallery(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                            <i class="fas fa-camera" style="color: white; font-size: 16px;"></i>
+                            <span style="color: white; font-size: 14px; font-weight: 500;">업로드</span>
+                        </div>
+                        <input type="file" id="imageInput" class="file-input" accept="image/*" multiple onchange="uploadImages(this)">
+                        <p style="font-size: 11px; color: var(--text-tertiary); text-align: center; margin-top: 8px; margin-bottom: 0;">
+                            - 이미지를 두번클릭시 본문반영
+                        </p>
+                        
+                        <!-- Image Gallery -->
+                        <div class="image-gallery" id="imageGallery">
+                            <!-- Gallery items will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Elements Panel -->
+            <div id="elementsPanel" class="panel" style="display: none;">
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <span class="section-title">도형</span>
+                    </div>
+                    <div class="section-content">
+                        <!-- Shape Categories -->
+                        <div class="shape-categories">
+                            <button class="shape-category-tab active" onclick="showShapeCategory('basic')">기본</button>
+                            <button class="shape-category-tab" onclick="showShapeCategory('bubble')">말풍선</button>
+                            <button class="shape-category-tab" onclick="showShapeCategory('line')">선</button>
+                            <button class="shape-category-tab" onclick="showShapeCategory('icon')">아이콘</button>
+                        </div>
+                        
+                        <!-- Basic Shapes -->
+                        <div id="basicShapes" class="shape-grid">
+                            <div class="shape-item" onclick="addShape('rectangle')">
+                                <svg viewBox="0 0 100 100">
+                                    <rect x="20" y="20" width="60" height="60" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('circle')">
+                                <svg viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="30" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('triangle')">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="50,20 80,70 20,70" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('diamond')">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="50,20 80,50 50,80 20,50" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('star')">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="50,15 61,35 82,35 67,50 73,71 50,59 27,71 33,50 18,35 39,35" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('heart')">
+                                <svg viewBox="0 0 100 100">
+                                    <path d="M50,25 C30,0 0,10 25,40 L50,70 L75,40 C100,10 70,0 50,25 Z" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('hexagon')">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="50,10 80,25 80,55 50,70 20,55 20,25" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('octagon')">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="35,15 65,15 85,35 85,65 65,85 35,85 15,65 15,35" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('arrow-right')">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="20,35 60,35 60,20 80,50 60,80 60,65 20,65" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('donut')">
+                                <svg viewBox="0 0 100 100">
+                                    <path d="M50,20 A30,30 0 1,1 49.9,20 Z M50,35 A15,15 0 1,0 50.1,35 Z" fill-rule="evenodd" fill="currentColor" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Bubble Shapes (Hidden by default) -->
+                        <div id="bubbleShapes" class="shape-grid" style="display: none;">
+                            <div class="shape-item" onclick="addShape('speech-bubble')">
+                                <svg viewBox="0 0 100 100">
+                                    <path d="M20,20 Q20,10 30,10 L70,10 Q80,10 80,20 L80,50 Q80,60 70,60 L40,60 L30,75 L30,60 L30,60 Q20,60 20,50 Z" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('thought-bubble')">
+                                <svg viewBox="0 0 100 100">
+                                    <ellipse cx="50" cy="40" rx="35" ry="25" fill="currentColor" />
+                                    <circle cx="30" cy="65" r="8" fill="currentColor" />
+                                    <circle cx="20" cy="75" r="5" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('banner')">
+                                <svg viewBox="0 0 100 100">
+                                    <path d="M10,30 L90,30 L90,60 L80,50 L90,60 L10,60 L20,50 L10,60 Z" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('ribbon')">
+                                <svg viewBox="0 0 100 100">
+                                    <path d="M20,40 L80,40 L85,50 L80,60 L20,60 L15,50 Z" fill="currentColor" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Line Shapes (Hidden by default) -->
+                        <div id="lineShapes" class="shape-grid" style="display: none;">
+                            <div class="shape-item" onclick="addShape('line-straight')">
+                                <svg viewBox="0 0 100 100">
+                                    <line x1="20" y1="50" x2="80" y2="50" stroke="currentColor" stroke-width="3" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('line-dashed')">
+                                <svg viewBox="0 0 100 100">
+                                    <line x1="20" y1="50" x2="80" y2="50" stroke="currentColor" stroke-width="3" stroke-dasharray="5,5" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('line-dotted')">
+                                <svg viewBox="0 0 100 100">
+                                    <line x1="20" y1="50" x2="80" y2="50" stroke="currentColor" stroke-width="3" stroke-dasharray="1,4" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('arrow-line')">
+                                <svg viewBox="0 0 100 100">
+                                    <defs>
+                                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                            <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" />
+                                        </marker>
+                                    </defs>
+                                    <line x1="20" y1="50" x2="80" y2="50" stroke="currentColor" stroke-width="3" marker-end="url(#arrowhead)" />
+                                </svg>
+                            </div>
+                            <div class="shape-item" onclick="addShape('arrow-double')">
+                                <svg viewBox="0 0 100 100">
+                                    <defs>
+                                        <marker id="arrowhead2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                            <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" />
+                                        </marker>
+                                        <marker id="arrowhead3" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+                                            <polygon points="10 0, 0 3.5, 10 7" fill="currentColor" />
+                                        </marker>
+                                    </defs>
+                                    <line x1="20" y1="50" x2="80" y2="50" stroke="currentColor" stroke-width="3" marker-start="url(#arrowhead3)" marker-end="url(#arrowhead2)" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Icon Shapes (Hidden by default) -->
+                        <div id="iconShapes" class="shape-grid" style="display: none;">
+                            <div class="shape-item" onclick="addShape('icon-check')">
+                                <i class="fas fa-check" style="font-size: 24px; color: var(--text-secondary);"></i>
+                            </div>
+                            <div class="shape-item" onclick="addShape('icon-heart')">
+                                <i class="fas fa-heart" style="font-size: 24px; color: var(--text-secondary);"></i>
+                            </div>
+                            <div class="shape-item" onclick="addShape('icon-star')">
+                                <i class="fas fa-star" style="font-size: 24px; color: var(--text-secondary);"></i>
+                            </div>
+                            <div class="shape-item" onclick="addShape('icon-bulb')">
+                                <i class="fas fa-lightbulb" style="font-size: 24px; color: var(--text-secondary);"></i>
+                            </div>
+                            <div class="shape-item" onclick="addShape('icon-home')">
+                                <i class="fas fa-home" style="font-size: 24px; color: var(--text-secondary);"></i>
+                            </div>
+                            <div class="shape-item" onclick="addShape('icon-user')">
+                                <i class="fas fa-user" style="font-size: 24px; color: var(--text-secondary);"></i>
+                            </div>
+                            <div class="shape-item" onclick="addShape('icon-search')">
+                                <i class="fas fa-search" style="font-size: 24px; color: var(--text-secondary);"></i>
+                            </div>
+                            <div class="shape-item" onclick="addShape('icon-comment')">
+                                <i class="fas fa-comment" style="font-size: 24px; color: var(--text-secondary);"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pages Panel -->
+            <div id="pagesPanel" class="panel" style="display: none;">
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <span class="section-title">페이지 관리</span>
+                    </div>
+                    <div class="section-content">
+                        <button class="btn btn-primary" style="width: 100%;" onclick="addPage()">
+                            <i class="fas fa-plus"></i>
+                            새 페이지 추가
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 페이지 여백 설정 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="section-title">페이지 여백</span>
+                        <i class="fas fa-chevron-down section-toggle"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label class="form-label">여백 프리셋</label>
+                            <select class="form-control" onchange="setPageMargin(this.value)">
+                                <option value="normal">보통 (60px)</option>
+                                <option value="narrow">좁게 (30px)</option>
+                                <option value="none">여백 없음 (0px)</option>
+                                <option value="wide">넓게 (80px)</option>
+                                <option value="custom">사용자 지정</option>
+                            </select>
+                        </div>
+                        
+                        <div id="customMarginControls" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">상하 여백 (px)</label>
+                                <input type="range" class="form-control" id="marginVertical" 
+                                       min="0" max="100" value="40" 
+                                       oninput="updateCustomMargin()">
+                                <span id="marginVerticalValue">40px</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">좌우 여백 (px)</label>
+                                <input type="range" class="form-control" id="marginHorizontal" 
+                                       min="0" max="100" value="60" 
+                                       oninput="updateCustomMargin()">
+                                <span id="marginHorizontalValue">60px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editor -->
+        <main class="editor-container">
+            <div class="editor-wrapper">
+                <div class="page" id="page1">
+                    <div class="editor-content" contenteditable="true" 
+                         onpaste="handlePaste(event)" 
+                         ondrop="handleDrop(event)" 
+                         ondragover="handleDragOver(event)"
+                         ondragenter="handleDragEnter(event)"
+                         oninput="updateContent()">
+                        <h1>제목을 입력해주세요.</h1>
+                        <p>여기에 내용을 작성하세요.</p>
+                    </div>
+                    <div class="page-number">1</div>
+                </div>
+                
+                <button class="add-page-btn" onclick="addPage()">
+                    <div class="add-page-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div>새 페이지 추가</div>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <input type="file" id="fileInput" class="file-input" accept=".json" onchange="loadDocument(this)">
+
+    <script>
+        let currentDocument = {
+            title: '제목 없는 문서',
+            pages: [],
+            settings: {
+                fontFamily: "'Noto Sans KR', sans-serif",
+                fontSize: '16px',
+                lineHeight: '1.8'
+            }
+        };
+
+        let pageCounter = 1;
+        let selectedImage = null;
+        let currentPanel = 'text';
+        let uploadedImages = [];
+        let resizing = false;
+        let resizeData = null;
+
+        // Initialize
+        function initDocument() {
+            updatePageNumbers();
+            setupEventListeners();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Color picker
+            document.getElementById('textColor').addEventListener('input', function() {
+                document.getElementById('textColorValue').textContent = this.value;
+            });
+
+            // Document title
+            document.getElementById('documentTitle').addEventListener('input', function() {
+                currentDocument.title = this.value || '제목 없는 문서';
+            });
+
+            // Click outside to deselect images
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.image-container') && !e.target.closest('.resize-handle')) {
+                    document.querySelectorAll('.image-container').forEach(container => {
+                        container.classList.remove('selected');
+                    });
+                    selectedImage = null;
+                }
+            });
+
+            // Prevent text selection while resizing
+            document.addEventListener('selectstart', function(e) {
+                if (resizing) {
+                    e.preventDefault();
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                        case 's':
+                            e.preventDefault();
+                            saveDocument();
+                            break;
+                        case 'o':
+                            e.preventDefault();
+                            openDocument();
+                            break;
+                        case 'b':
+                            e.preventDefault();
+                            toggleFormat('bold');
+                            break;
+                        case 'i':
+                            e.preventDefault();
+                            toggleFormat('italic');
+                            break;
+                        case 'u':
+                            e.preventDefault();
+                            toggleFormat('underline');
+                            break;
+                        case 'c':
+                            // 도형이 선택된 경우 복사
+                            if (selectedShape && !window.getSelection().toString()) {
+                                e.preventDefault();
+                                copiedShape = selectedShape.cloneNode(true);
+                                showToast('도형이 복사되었습니다');
+                            }
+                            break;
+                        case 'v':
+                            // 복사된 도형이 있는 경우 붙여넣기
+                            if (copiedShape && !window.getSelection().toString()) {
+                                e.preventDefault();
+                                pasteShape();
+                            }
+                            break;
+                    }
+                }
+                
+                // Delete 키로 도형 삭제
+                if (e.key === 'Delete' && selectedShape) {
+                    selectedShape.remove();
+                    selectedShape = null;
+                    showToast('도형이 삭제되었습니다');
+                }
+            });
+        }
+
+        // Show panel
+        function showPanel(panelName) {
+            // Update active button
+            document.querySelectorAll('.icon-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.icon-btn').classList.add('active');
+
+            // Hide all panels
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+
+            // Show selected panel
+            document.getElementById(panelName + 'Panel').style.display = 'block';
+
+            // Update sidebar header
+            const titles = {
+                text: '텍스트',
+                upload: '업로드',
+                elements: '요소',
+                pages: '페이지'
+            };
+            document.querySelector('.sidebar-header').textContent = titles[panelName];
+
+            // Show sidebar on mobile
+            if (window.innerWidth <= 1024) {
+                document.getElementById('toolSidebar').classList.add('open');
+            }
+        }
+
+        // Toggle section
+        function toggleSection(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            content.classList.toggle('collapsed');
+        }
+
+        // Apply format
+        function applyFormat(property, value) {
+            // Font family의 경우 execCommand 사용
+            if (property === 'fontFamily') {
+                document.execCommand('styleWithCSS', false, true);
+                document.execCommand('fontName', false, value);
+            } 
+            // Font size의 경우
+            else if (property === 'fontSize') {
+                document.execCommand('styleWithCSS', false, true);
+                // fontSize를 1-7 값으로 변환 (execCommand의 fontSize는 1-7만 지원)
+                const size = parseInt(value);
+                let sizeValue = '3'; // 기본값
+                if (size <= 10) sizeValue = '1';
+                else if (size <= 13) sizeValue = '2';
+                else if (size <= 16) sizeValue = '3';
+                else if (size <= 18) sizeValue = '4';
+                else if (size <= 24) sizeValue = '5';
+                else if (size <= 32) sizeValue = '6';
+                else sizeValue = '7';
+                
+                document.execCommand('fontSize', false, sizeValue);
+                
+                // 정확한 크기를 위해 span의 style 수정
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const container = selection.getRangeAt(0).commonAncestorContainer.parentElement;
+                    const spans = container.querySelectorAll('span[style*="font-size"]');
+                    spans.forEach(span => {
+                        if (span.style.fontSize.includes('px') === false) {
+                            span.style.fontSize = value;
+                        }
+                    });
+                }
+            }
+            // Color의 경우
+            else if (property === 'color') {
+                document.execCommand('styleWithCSS', false, true);
+                document.execCommand('foreColor', false, value);
+            }
+            // Text align의 경우
+            else if (property === 'textAlign') {
+                if (value === 'left') document.execCommand('justifyLeft', false, null);
+                else if (value === 'center') document.execCommand('justifyCenter', false, null);
+                else if (value === 'right') document.execCommand('justifyRight', false, null);
+                else if (value === 'justify') document.execCommand('justifyFull', false, null);
+            }
+            // Line height나 기타 속성의 경우
+            else {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    
+                    // 선택 영역이 있는 경우
+                    if (!range.collapsed) {
+                        // 복잡한 선택 영역 처리
+                        const fragment = range.extractContents();
+                        const span = document.createElement('span');
+                        span.style[property] = value;
+                        span.appendChild(fragment);
+                        range.insertNode(span);
+                        
+                        // 선택 영역 복원
+                        selection.removeAllRanges();
+                        const newRange = document.createRange();
+                        newRange.selectNodeContents(span);
+                        selection.addRange(newRange);
+                    }
+                }
+            }
+        }
+
+        // Toggle format
+        function toggleFormat(command) {
+            document.execCommand(command, false, null);
+            updateFormatButtons();
+        }
+
+        // Update format buttons
+        function updateFormatButtons() {
+            const buttons = document.querySelectorAll('.format-btn');
+            buttons.forEach(btn => {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    let command = '';
+                    if (icon.classList.contains('fa-bold')) command = 'bold';
+                    else if (icon.classList.contains('fa-italic')) command = 'italic';
+                    else if (icon.classList.contains('fa-underline')) command = 'underline';
+                    
+                    if (command && document.queryCommandState(command)) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        // Change font size
+        function changeFontSize(delta) {
+            const input = document.getElementById('fontSize');
+            const newSize = parseInt(input.value) + delta;
+            if (newSize >= 8 && newSize <= 144) {
+                input.value = newSize;
+                applyFormat('fontSize', newSize + 'px');
+            }
+        }
+
+        // Set alignment
+        function setAlignment(alignment) {
+            applyFormat('textAlign', alignment);
+            
+            // Update active button
+            document.querySelectorAll('.align-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.align-btn').classList.add('active');
+        }
+
+        // Insert list
+        function insertList(type) {
+            if (type === 'ul') {
+                document.execCommand('insertUnorderedList', false, null);
+            } else {
+                document.execCommand('insertOrderedList', false, null);
+            }
+        }
+
+        // Upload images to gallery
+        function uploadImages(input) {
+            const files = Array.from(input.files);
+            
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        addImageToGallery(e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Add image to gallery
+        function addImageToGallery(src) {
+            const imageId = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            uploadedImages.push({ id: imageId, src: src });
+            
+            const galleryItem = document.createElement('div');
+            galleryItem.className = 'gallery-item';
+            galleryItem.dataset.imageId = imageId;
+            galleryItem.draggable = true;
+            galleryItem.innerHTML = `
+                <img src="${src}" alt="Uploaded image">
+                <button class="delete-btn" onclick="removeFromGallery('${imageId}')" title="삭제">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add drag event listeners
+            galleryItem.addEventListener('dragstart', handleGalleryDragStart);
+            galleryItem.addEventListener('dragend', handleGalleryDragEnd);
+            
+            // Add double-click event listener
+            galleryItem.addEventListener('dblclick', function() {
+                const image = uploadedImages.find(img => img.id === imageId);
+                if (image) {
+                    // Focus on the editor
+                    const editorContent = document.querySelector('.editor-content');
+                    editorContent.focus();
+                    
+                    // Place cursor at the end
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(editorContent);
+                    range.collapse(false);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    
+                    // Insert image
+                    insertImageAtCursor(image.src);
+                }
+            });
+            
+            document.getElementById('imageGallery').appendChild(galleryItem);
+            showToast('이미지가 갤러리에 추가되었습니다');
+        }
+
+        // Remove image from gallery
+        function removeFromGallery(imageId) {
+            uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+            const galleryItem = document.querySelector(`[data-image-id="${imageId}"]`);
+            if (galleryItem) {
+                galleryItem.remove();
+                showToast('이미지가 삭제되었습니다');
+            }
+        }
+
+        // Gallery drag start
+        function handleGalleryDragStart(e) {
+            e.target.classList.add('dragging');
+            const imageId = e.target.dataset.imageId;
+            const image = uploadedImages.find(img => img.id === imageId);
+            e.dataTransfer.effectAllowed = 'copy';
+            e.dataTransfer.setData('imageData', JSON.stringify(image));
+        }
+
+        // Gallery drag end
+        function handleGalleryDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        // Insert image at cursor
+        function insertImageAtCursor(src, x, y) {
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'image-container';
+            imageContainer.style.width = '200px'; // Default width
+            
+            // Position at cursor or default position
+            if (x && y) {
+                const editorContent = document.querySelector('.editor-content');
+                const rect = editorContent.getBoundingClientRect();
+                imageContainer.style.left = (x - rect.left) + 'px';
+                imageContainer.style.top = (y - rect.top) + 'px';
+            } else {
+                // Default center position
+                imageContainer.style.left = '50%';
+                imageContainer.style.top = '20px';
+                imageContainer.style.transform = 'translateX(-50%)';
+            }
+            
+            imageContainer.innerHTML = `
+                <img src="${src}" class="inserted-image" draggable="false">
+                <div class="resize-handles">
+                    <div class="resize-handle top-left" data-handle="top-left"></div>
+                    <div class="resize-handle top" data-handle="top"></div>
+                    <div class="resize-handle top-right" data-handle="top-right"></div>
+                    <div class="resize-handle right" data-handle="right"></div>
+                    <div class="resize-handle bottom-right" data-handle="bottom-right"></div>
+                    <div class="resize-handle bottom" data-handle="bottom"></div>
+                    <div class="resize-handle bottom-left" data-handle="bottom-left"></div>
+                    <div class="resize-handle left" data-handle="left"></div>
+                </div>
+                <div class="image-controls">
+                    <button class="image-control-btn" onclick="alignImage(this, 'left')" title="왼쪽 정렬">
+                        <i class="fas fa-align-left"></i>
+                    </button>
+                    <button class="image-control-btn" onclick="alignImage(this, 'center')" title="가운데 정렬">
+                        <i class="fas fa-align-center"></i>
+                    </button>
+                    <button class="image-control-btn" onclick="alignImage(this, 'right')" title="오른쪽 정렬">
+                        <i class="fas fa-align-right"></i>
+                    </button>
+                    <button class="image-control-btn" onclick="toggleImageMode(this)" title="인라인/블록">
+                        <i class="fas fa-arrows-alt-h"></i>
+                    </button>
+                    <button class="image-control-btn" onclick="deleteImage(this)" title="삭제">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Add click event
+            imageContainer.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('resize-handle') && !e.target.closest('.image-control-btn')) {
+                    selectImage(this);
+                }
+            });
+            
+            // Add drag functionality
+            imageContainer.addEventListener('mousedown', function(e) {
+                if (e.target.classList.contains('resize-handle') || e.target.closest('.image-control-btn')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                selectImage(this);
+                
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startLeft = parseInt(this.style.left) || 0;
+                const startTop = parseInt(this.style.top) || 0;
+                const container = this;
+                
+                container.classList.add('dragging');
+                
+                function handleMouseMove(e) {
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+                    
+                    container.style.left = (startLeft + deltaX) + 'px';
+                    container.style.top = (startTop + deltaY) + 'px';
+                    container.style.transform = 'none'; // Remove any transform
+                }
+                
+                function handleMouseUp() {
+                    container.classList.remove('dragging');
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+                
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+            });
+            
+            // Add resize event listeners
+            const handles = imageContainer.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', startResize);
+            });
+            
+            // Add to editor content
+            const editorContent = document.querySelector('.editor-content');
+            editorContent.appendChild(imageContainer);
+            
+            showToast('이미지가 추가되었습니다');
+        }
+
+        // Select image
+        function selectImage(container) {
+            document.querySelectorAll('.image-container').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            container.classList.add('selected');
+            selectedImage = container;
+        }
+
+        // Start resize
+        function startResize(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const container = e.target.closest('.image-container');
+            const handle = e.target.dataset.handle;
+            
+            resizing = true;
+            resizeData = {
+                container: container,
+                handle: handle,
+                startX: e.clientX,
+                startY: e.clientY,
+                startWidth: container.offsetWidth,
+                startHeight: container.offsetHeight,
+                aspectRatio: container.offsetWidth / container.offsetHeight
+            };
+            
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
+            
+            document.body.style.cursor = e.target.style.cursor;
+        }
+
+        // Do resize
+        function doResize(e) {
+            if (!resizing || !resizeData) return;
+            
+            const dx = e.clientX - resizeData.startX;
+            const dy = e.clientY - resizeData.startY;
+            let newWidth = resizeData.startWidth;
+            let newHeight = resizeData.startHeight;
+            
+            switch (resizeData.handle) {
+                case 'right':
+                    newWidth = resizeData.startWidth + dx;
+                    break;
+                case 'left':
+                    newWidth = resizeData.startWidth - dx;
+                    break;
+                case 'bottom':
+                    newHeight = resizeData.startHeight + dy;
+                    break;
+                case 'top':
+                    newHeight = resizeData.startHeight - dy;
+                    break;
+                case 'bottom-right':
+                    newWidth = resizeData.startWidth + dx;
+                    newHeight = newWidth / resizeData.aspectRatio;
+                    break;
+                case 'bottom-left':
+                    newWidth = resizeData.startWidth - dx;
+                    newHeight = newWidth / resizeData.aspectRatio;
+                    break;
+                case 'top-right':
+                    newWidth = resizeData.startWidth + dx;
+                    newHeight = newWidth / resizeData.aspectRatio;
+                    break;
+                case 'top-left':
+                    newWidth = resizeData.startWidth - dx;
+                    newHeight = newWidth / resizeData.aspectRatio;
+                    break;
+            }
+            
+            // Minimum size
+            newWidth = Math.max(50, newWidth);
+            newHeight = Math.max(50, newHeight);
+            
+            // Maximum size (container width)
+            const maxWidth = resizeData.container.parentElement.offsetWidth - 120; // padding
+            newWidth = Math.min(maxWidth, newWidth);
+            
+            resizeData.container.style.width = newWidth + 'px';
+            if (resizeData.handle !== 'left' && resizeData.handle !== 'right') {
+                resizeData.container.style.height = newHeight + 'px';
+            }
+        }
+
+        // Stop resize
+        function stopResize() {
+            resizing = false;
+            resizeData = null;
+            document.removeEventListener('mousemove', doResize);
+            document.removeEventListener('mouseup', stopResize);
+            document.body.style.cursor = '';
+        }
+
+        // Delete image
+        function deleteImage(btn) {
+            btn.closest('.image-container').remove();
+            selectedImage = null;
+            showToast('이미지가 삭제되었습니다');
+        }
+        
+        // Align image
+        function alignImage(btn, alignment) {
+            const container = btn.closest('.image-container');
+            const editorContent = container.parentElement;
+            const editorWidth = editorContent.offsetWidth;
+            const imageWidth = container.offsetWidth;
+            
+            container.style.transform = 'none';
+            
+            switch(alignment) {
+                case 'left':
+                    container.style.left = '0px';
+                    break;
+                case 'center':
+                    container.style.left = ((editorWidth - imageWidth) / 2) + 'px';
+                    break;
+                case 'right':
+                    container.style.left = (editorWidth - imageWidth) + 'px';
+                    break;
+            }
+            
+            showToast(`이미지가 ${alignment === 'left' ? '왼쪽' : alignment === 'center' ? '가운데' : '오른쪽'}으로 정렬되었습니다`);
+        }
+        
+        // Toggle image mode (absolute/inline)
+        function toggleImageMode(btn) {
+            const container = btn.closest('.image-container');
+            
+            if (container.style.position === 'absolute') {
+                // Switch to inline mode
+                container.style.position = 'relative';
+                container.style.left = 'auto';
+                container.style.top = 'auto';
+                container.style.transform = 'none';
+                container.style.display = 'block';
+                container.style.margin = '8px auto';
+                showToast('인라인 모드로 변경되었습니다');
+            } else {
+                // Switch to absolute mode
+                container.style.position = 'absolute';
+                container.style.left = '50%';
+                container.style.top = '20px';
+                container.style.transform = 'translateX(-50%)';
+                container.style.display = 'inline-block';
+                container.style.margin = '0';
+                showToast('자유 배치 모드로 변경되었습니다');
+            }
+        }
+
+        // Drag and drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            if (e.currentTarget.classList.contains('image-upload-area')) {
+                e.currentTarget.classList.add('dragover');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (e.currentTarget.classList.contains('image-upload-area')) {
+                e.currentTarget.classList.remove('dragover');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            // Check if it's an image from gallery
+            const imageData = e.dataTransfer.getData('imageData');
+            if (imageData) {
+                const image = JSON.parse(imageData);
+                insertImageAtCursor(image.src, e.clientX, e.clientY);
+                return;
+            }
+            
+            // Handle file drop
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    insertImageAtCursor(event.target.result, e.clientX, e.clientY);
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        }
+
+        // Handle drop to gallery
+        function handleDropToGallery(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            const validFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+            
+            validFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    addImageToGallery(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Handle paste
+        function handlePaste(e) {
+            const items = e.clipboardData.items;
+            
+            for (let item of items) {
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        insertImageAtCursor(event.target.result);
+                    };
+                    reader.readAsDataURL(blob);
+                    break;
+                }
+            }
+        }
+
+        // Add page
+        function addPage() {
+            pageCounter++;
+            const newPage = document.createElement('div');
+            newPage.className = 'page';
+            newPage.id = `page${pageCounter}`;
+            
+            // 현재 페이지의 여백 설정 가져오기
+            const existingPage = document.querySelector('.page');
+            if (existingPage) {
+                newPage.style.padding = existingPage.style.padding;
+            }
+            
+            newPage.innerHTML = `
+                <div class="editor-content" contenteditable="true" 
+                     onpaste="handlePaste(event)" 
+                     ondrop="handleDrop(event)" 
+                     ondragover="handleDragOver(event)"
+                     ondragenter="handleDragEnter(event)"
+                     oninput="updateContent()">
+                    <p>새 페이지 내용을 입력하세요...</p>
+                </div>
+                <div class="page-number">${pageCounter}</div>
+            `;
+            
+            const addButton = document.querySelector('.add-page-btn');
+            addButton.parentNode.insertBefore(newPage, addButton);
+            
+            newPage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showToast('새 페이지가 추가되었습니다');
+        }
+
+        // Update page numbers
+        function updatePageNumbers() {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach((page, index) => {
+                const pageNumber = page.querySelector('.page-number');
+                if (pageNumber) {
+                    pageNumber.textContent = index + 1;
+                }
+                page.id = `page${index + 1}`;
+            });
+            pageCounter = pages.length;
+        }
+
+        // Save document
+        function saveDocument() {
+            const pages = Array.from(document.querySelectorAll('.page')).map(page => {
+                return {
+                    content: page.querySelector('.editor-content').innerHTML
+                };
+            });
+
+            currentDocument.pages = pages;
+
+            const dataStr = JSON.stringify(currentDocument, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `${currentDocument.title}.json`;
+            link.click();
+            
+            showToast('문서가 저장되었습니다');
+        }
+
+        // Open document
+        function openDocument() {
+            document.getElementById('fileInput').click();
+        }
+
+        // Load document
+        function loadDocument(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        loadDocumentData(data);
+                        showToast('문서가 로드되었습니다');
+                    } catch (error) {
+                        showToast('파일을 읽을 수 없습니다');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Load document data
+        function loadDocumentData(data) {
+            currentDocument = data;
+            document.getElementById('documentTitle').value = data.title;
+            
+            // Remove existing pages except first
+            document.querySelectorAll('.page:not(:first-child)').forEach(page => page.remove());
+            
+            // Update first page or create pages
+            if (data.pages.length > 0) {
+                document.querySelector('.page .editor-content').innerHTML = data.pages[0].content;
+                
+                // Add remaining pages
+                for (let i = 1; i < data.pages.length; i++) {
+                    pageCounter++;
+                    const newPage = document.createElement('div');
+                    newPage.className = 'page';
+                    newPage.id = `page${pageCounter}`;
+                    newPage.innerHTML = `
+                        <div class="editor-content" contenteditable="true" 
+                             onpaste="handlePaste(event)" 
+                             ondrop="handleDrop(event)" 
+                             ondragover="handleDragOver(event)"
+                             ondragenter="handleDragEnter(event)"
+                             oninput="updateContent()">
+                            ${data.pages[i].content}
+                        </div>
+                        <div class="page-number">${pageCounter}</div>
+                    `;
+                    
+                    const addButton = document.querySelector('.add-page-btn');
+                    addButton.parentNode.insertBefore(newPage, addButton);
+                }
+            }
+            
+            updatePageNumbers();
+        }
+
+        // Export to PDF
+        async function exportToPDF() {
+            showToast('PDF를 생성하고 있습니다...');
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            const pages = document.querySelectorAll('.page');
+            
+            for (let i = 0; i < pages.length; i++) {
+                if (i > 0) {
+                    pdf.addPage();
+                }
+                
+                try {
+                    const canvas = await html2canvas(pages[i], {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff'
+                    });
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 210; // A4 width in mm
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                } catch (error) {
+                    console.error('페이지 렌더링 오류:', error);
+                }
+            }
+            
+            pdf.save(`${currentDocument.title}.pdf`);
+            showToast('PDF가 다운로드되었습니다');
+        }
+
+        // Show toast
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Update content
+        function updateContent() {
+            // Auto-save logic can be added here
+        }
+        
+        // ==================== SHAPE FUNCTIONS ====================
+        let shapeIdCounter = 0;
+        let selectedShape = null;
+        let copiedShape = null;
+        
+        // Show shape category
+        function showShapeCategory(category) {
+            // Update tab active state
+            document.querySelectorAll('.shape-category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Hide all shape grids
+            document.getElementById('basicShapes').style.display = 'none';
+            document.getElementById('bubbleShapes').style.display = 'none';
+            document.getElementById('lineShapes').style.display = 'none';
+            document.getElementById('iconShapes').style.display = 'none';
+            
+            // Show selected category
+            switch(category) {
+                case 'basic':
+                    document.getElementById('basicShapes').style.display = 'grid';
+                    break;
+                case 'bubble':
+                    document.getElementById('bubbleShapes').style.display = 'grid';
+                    break;
+                case 'line':
+                    document.getElementById('lineShapes').style.display = 'grid';
+                    break;
+                case 'icon':
+                    document.getElementById('iconShapes').style.display = 'grid';
+                    break;
+            }
+        }
+        
+        // Add shape to editor
+        function addShape(shapeType) {
+            const editorContent = document.querySelector('.editor-content');
+            const shapeElement = document.createElement('div');
+            shapeElement.className = 'shape-element';
+            shapeElement.id = `shape-${++shapeIdCounter}`;
+            shapeElement.style.width = '100px';
+            shapeElement.style.height = '100px';
+            // Center position without using transform
+            const editorRect = editorContent.getBoundingClientRect();
+            shapeElement.style.left = (editorRect.width / 2 - 50) + 'px'; // 50 is half of default width
+            shapeElement.style.top = '100px';
+            
+            // Create SVG based on shape type
+            let svgContent = getShapeSVG(shapeType);
+            shapeElement.innerHTML = svgContent;
+            
+            // Add shape controls
+            const controls = document.createElement('div');
+            controls.className = 'image-controls';
+            controls.innerHTML = `
+                <button class="image-control-btn" onclick="copyShape(this)" title="복사">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="image-control-btn" onclick="toggleShapeFill(this)" title="채우기/테두리">
+                    <i class="fas fa-fill-drip"></i>
+                </button>
+                <button class="image-control-btn" onclick="changeShapeColor(this)" title="색상 변경">
+                    <i class="fas fa-palette"></i>
+                </button>
+                <button class="image-control-btn" onclick="deleteShape(this)" title="삭제">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            shapeElement.appendChild(controls);
+            
+            // Set initial data attributes
+            shapeElement.dataset.rotation = '0';
+            shapeElement.dataset.fillMode = 'fill'; // 'fill' or 'stroke'
+            shapeElement.dataset.currentColor = '#6c757d'; // 초기 색상
+            shapeElement.dataset.shapeType = shapeType; // 도형 타입 저장
+            
+            // Add resize handles
+            const resizeHandles = document.createElement('div');
+            resizeHandles.className = 'resize-handles';
+            resizeHandles.innerHTML = `
+                <div class="resize-handle top-left" data-handle="top-left"></div>
+                <div class="resize-handle top-right" data-handle="top-right"></div>
+                <div class="resize-handle bottom-left" data-handle="bottom-left"></div>
+                <div class="resize-handle bottom-right" data-handle="bottom-right"></div>
+                <div class="resize-handle top" data-handle="top"></div>
+                <div class="resize-handle right" data-handle="right"></div>
+                <div class="resize-handle bottom" data-handle="bottom"></div>
+                <div class="resize-handle left" data-handle="left"></div>
+            `;
+            shapeElement.appendChild(resizeHandles);
+            
+            // Add rotation handle
+            const rotationHandle = document.createElement('div');
+            rotationHandle.className = 'rotation-handle';
+            shapeElement.appendChild(rotationHandle);
+            
+            // Add rotation functionality
+            rotationHandle.addEventListener('mousedown', startShapeRotation);
+            
+            // Make shape draggable
+            makeShapeDraggable(shapeElement);
+            
+            editorContent.appendChild(shapeElement);
+            selectShape(shapeElement);
+            showToast(`도형이 추가되었습니다`);
+        }
+        
+        // Get SVG content for shape
+        function getShapeSVG(shapeType) {
+            const strokeWidth = 3;
+            const shapes = {
+                'rectangle': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><rect x="10" y="10" width="80" height="80" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'circle': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><circle cx="50" cy="50" r="40" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'triangle': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><polygon points="50,10 90,80 10,80" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'diamond': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><polygon points="50,10 90,50 50,90 10,50" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'star': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><polygon points="50,10 61,35 87,35 69,51 76,76 50,61 24,76 31,51 13,35 39,35" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'heart': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><path d="M50,20 C30,-5 0,5 20,35 L50,75 L80,35 C100,5 70,-5 50,20 Z" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'hexagon': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'octagon': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><polygon points="35,10 65,10 90,35 90,65 65,90 35,90 10,65 10,35" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'arrow-right': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><polygon points="10,35 60,35 60,20 90,50 60,80 60,65 10,65" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'donut': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><path d="M50,10 A40,40 0 1,1 49.9,10 Z M50,30 A20,20 0 1,0 50.1,30 Z" fill-rule="evenodd" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'speech-bubble': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><path d="M15,15 Q15,5 25,5 L75,5 Q85,5 85,15 L85,50 Q85,60 75,60 L40,60 L25,80 L25,60 L25,60 Q15,60 15,50 Z" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'thought-bubble': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><ellipse cx="50" cy="35" rx="40" ry="25" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /><circle cx="25" cy="65" r="10" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /><circle cx="15" cy="80" r="6" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'banner': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><path d="M5,25 L95,25 L95,65 L85,55 L95,65 L5,65 L15,55 L5,65 Z" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'ribbon': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><path d="M15,35 L85,35 L92,50 L85,65 L15,65 L8,50 Z" fill="#6c757d" stroke="#6c757d" stroke-width="${strokeWidth}" /></svg>`,
+                'line-straight': '<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><line x1="10" y1="50" x2="90" y2="50" stroke="#6c757d" stroke-width="4" /></svg>',
+                'line-dashed': '<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><line x1="10" y1="50" x2="90" y2="50" stroke="#6c757d" stroke-width="4" stroke-dasharray="8,4" /></svg>',
+                'line-dotted': '<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><line x1="10" y1="50" x2="90" y2="50" stroke="#6c757d" stroke-width="4" stroke-dasharray="2,6" /></svg>',
+                'arrow-line': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><defs><marker id="arrow${shapeIdCounter}" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6c757d" /></marker></defs><line x1="10" y1="50" x2="90" y2="50" stroke="#6c757d" stroke-width="4" marker-end="url(#arrow${shapeIdCounter})" /></svg>`,
+                'arrow-double': `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none"><defs><marker id="arrowStart${shapeIdCounter}" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#6c757d" /></marker><marker id="arrowEnd${shapeIdCounter}" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#6c757d" /></marker></defs><line x1="10" y1="50" x2="90" y2="50" stroke="#6c757d" stroke-width="4" marker-start="url(#arrowStart${shapeIdCounter})" marker-end="url(#arrowEnd${shapeIdCounter})" /></svg>`
+            };
+            
+            // Handle icons
+            if (shapeType.startsWith('icon-')) {
+                const iconMap = {
+                    'icon-check': 'fa-check',
+                    'icon-heart': 'fa-heart',
+                    'icon-star': 'fa-star',
+                    'icon-bulb': 'fa-lightbulb',
+                    'icon-home': 'fa-home',
+                    'icon-user': 'fa-user',
+                    'icon-search': 'fa-search',
+                    'icon-comment': 'fa-comment'
+                };
+                const iconClass = iconMap[shapeType] || 'fa-circle';
+                return `<i class="fas ${iconClass}" style="font-size: 48px; color: #6c757d; display: block; text-align: center; line-height: 100px;"></i>`;
+            }
+            
+            // Adjust height for line shapes
+            if (shapeType.includes('line')) {
+                shapeElement.style.height = '20px';
+            }
+            
+            return shapes[shapeType] || shapes['circle'];
+        }
+        
+        // Make shape draggable
+        function makeShapeDraggable(shapeElement) {
+            let clickTimer = null;
+            let isDragging = false;
+            
+            shapeElement.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.image-control-btn') || e.target.classList.contains('resize-handle')) return;
+                
+                e.preventDefault();
+                selectShape(this);
+                
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startLeft = parseInt(this.style.left) || 0;
+                const startTop = parseInt(this.style.top) || 0;
+                const shape = this;
+                
+                shape.classList.add('dragging');
+                isDragging = false;
+                
+                function handleMouseMove(e) {
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+                    
+                    // 최소 이동 거리를 확인하여 드래그 여부 판단
+                    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                        isDragging = true;
+                    }
+                    
+                    shape.style.left = (startLeft + deltaX) + 'px';
+                    shape.style.top = (startTop + deltaY) + 'px';
+                    // Keep rotation if exists
+                    const rotation = shape.dataset.rotation || '0';
+                    shape.style.transform = `rotate(${rotation}deg)`;
+                }
+                
+                function handleMouseUp() {
+                    shape.classList.remove('dragging');
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+                
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+            });
+            
+            shapeElement.addEventListener('click', function(e) {
+                if (!e.target.closest('.image-control-btn') && !e.target.classList.contains('resize-handle') && !isDragging) {
+                    selectShape(this);
+                    
+                    // 더블클릭 감지
+                    if (clickTimer) {
+                        clearTimeout(clickTimer);
+                        clickTimer = null;
+                        // 더블클릭 시 본문에 도형 삽입
+                        insertShapeToContent(this);
+                    } else {
+                        clickTimer = setTimeout(() => {
+                            clickTimer = null;
+                        }, 300);
+                    }
+                }
+            });
+            
+            // Add resize functionality
+            const handles = shapeElement.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', startShapeResize);
+            });
+        }
+        
+        // Select shape
+        function selectShape(shape) {
+            document.querySelectorAll('.shape-element').forEach(s => {
+                s.classList.remove('selected');
+            });
+            shape.classList.add('selected');
+            selectedShape = shape;
+        }
+        
+        // Insert shape to content
+        function insertShapeToContent(shape) {
+            const editorContent = document.querySelector('.editor-content');
+            
+            // SVG나 아이콘 내용 복사
+            const svgElement = shape.querySelector('svg');
+            const iconElement = shape.querySelector('i');
+            
+            if (svgElement) {
+                // SVG 도형인 경우
+                const svgClone = svgElement.cloneNode(true);
+                
+                // 인라인 스타일로 크기 설정
+                const width = parseInt(shape.style.width);
+                const height = parseInt(shape.style.height);
+                svgClone.style.width = width + 'px';
+                svgClone.style.height = height + 'px';
+                svgClone.style.display = 'inline-block';
+                svgClone.style.verticalAlign = 'middle';
+                
+                // 커서 위치에 삽입
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                range.insertNode(svgClone);
+                
+                // 커서를 도형 뒤로 이동
+                range.setStartAfter(svgClone);
+                range.setEndAfter(svgClone);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                showToast('도형이 본문에 삽입되었습니다');
+            } else if (iconElement) {
+                // 아이콘인 경우
+                const iconClone = iconElement.cloneNode(true);
+                iconClone.style.display = 'inline';
+                iconClone.style.verticalAlign = 'middle';
+                
+                // 커서 위치에 삽입
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                range.insertNode(iconClone);
+                
+                // 커서를 아이콘 뒤로 이동
+                range.setStartAfter(iconClone);
+                range.setEndAfter(iconClone);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                showToast('아이콘이 본문에 삽입되었습니다');
+            }
+        }
+        
+        // Copy shape
+        function copyShape(btn) {
+            const shape = btn.closest('.shape-element');
+            copiedShape = shape.cloneNode(true);
+            showToast('도형이 복사되었습니다');
+        }
+        
+        // Paste shape
+        function pasteShape() {
+            if (!copiedShape) return;
+            
+            const editorContent = document.querySelector('.editor-content');
+            
+            // 도형 복제
+            const newShape = copiedShape.cloneNode(true);
+            
+            // 새로운 ID 부여
+            newShape.id = `shape-${++shapeIdCounter}`;
+            
+            // 위치 조정 (원본에서 약간 오프셋)
+            const currentLeft = parseInt(newShape.style.left) || 0;
+            const currentTop = parseInt(newShape.style.top) || 0;
+            newShape.style.left = (currentLeft + 20) + 'px';
+            newShape.style.top = (currentTop + 20) + 'px';
+            
+            // 드래그 및 이벤트 다시 설정
+            makeShapeDraggable(newShape);
+            
+            // 회전 핸들 이벤트 재설정
+            const rotationHandle = newShape.querySelector('.rotation-handle');
+            if (rotationHandle) {
+                rotationHandle.addEventListener('mousedown', startShapeRotation);
+            }
+            
+            // 리사이즈 핸들 이벤트 재설정
+            const handles = newShape.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', startShapeResize);
+            });
+            
+            // 에디터에 추가
+            editorContent.appendChild(newShape);
+            
+            // 새 도형 선택
+            selectShape(newShape);
+            
+            showToast('도형이 붙여넣기되었습니다');
+        }
+        
+        // Delete shape
+        function deleteShape(btn) {
+            btn.closest('.shape-element').remove();
+            selectedShape = null;
+            showToast('도형이 삭제되었습니다');
+        }
+        
+        // Change shape color
+        function changeShapeColor(btn) {
+            const shape = btn.closest('.shape-element');
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.value = '#6c757d';
+            colorInput.style.position = 'fixed';
+            colorInput.style.top = '-100px';
+            colorInput.style.left = '-100px';
+            
+            document.body.appendChild(colorInput);
+            
+            colorInput.addEventListener('change', function() {
+                const svg = shape.querySelector('svg');
+                if (svg) {
+                    svg.querySelectorAll('*').forEach(el => {
+                        if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none' && el.getAttribute('fill') !== 'currentColor') {
+                            el.setAttribute('fill', this.value);
+                        }
+                        if (el.hasAttribute('stroke') && el.getAttribute('stroke') !== 'none' && el.getAttribute('stroke') !== 'currentColor') {
+                            el.setAttribute('stroke', this.value);
+                        }
+                    });
+                } else {
+                    // For icons
+                    const icon = shape.querySelector('i');
+                    if (icon) {
+                        icon.style.color = this.value;
+                    }
+                }
+                
+                // 색상 정보 저장
+                shape.dataset.currentColor = this.value;
+                
+                // 현재 fill/stroke 모드 확인 후 적용
+                const fillMode = shape.dataset.fillMode || 'fill';
+                if (fillMode === 'stroke') {
+                    // 테두리 모드일 때 색상 업데이트
+                    if (svg) {
+                        svg.querySelectorAll('*').forEach(el => {
+                            if (el.hasAttribute('stroke')) {
+                                el.setAttribute('stroke', this.value);
+                            }
+                        });
+                    } else if (icon) {
+                        icon.style.webkitTextStroke = '2px ' + this.value;
+                    }
+                }
+                
+                showToast('도형 색상이 변경되었습니다');
+                document.body.removeChild(colorInput);
+            });
+            
+            colorInput.click();
+        }
+        
+        // Toggle shape fill/stroke
+        function toggleShapeFill(btn) {
+            const shape = btn.closest('.shape-element');
+            const currentMode = shape.dataset.fillMode || 'fill';
+            const newMode = currentMode === 'fill' ? 'stroke' : 'fill';
+            shape.dataset.fillMode = newMode;
+            
+            const svg = shape.querySelector('svg');
+            if (svg) {
+                svg.querySelectorAll('*').forEach(el => {
+                    if (el.hasAttribute('fill') || el.hasAttribute('stroke')) {
+                        if (newMode === 'stroke') {
+                            // 테두리만 표시
+                            if (el.hasAttribute('fill')) {
+                                el.setAttribute('fill', 'none');
+                            }
+                            if (el.hasAttribute('stroke')) {
+                                const currentColor = shape.dataset.currentColor || '#6c757d';
+                                el.setAttribute('stroke', currentColor);
+                                el.setAttribute('stroke-width', '3');
+                            }
+                        } else {
+                            // 채우기 표시
+                            if (el.hasAttribute('fill')) {
+                                const currentColor = shape.dataset.currentColor || '#6c757d';
+                                el.setAttribute('fill', currentColor);
+                            }
+                            if (el.hasAttribute('stroke')) {
+                                el.setAttribute('stroke', shape.dataset.currentColor || '#6c757d');
+                                el.setAttribute('stroke-width', '3');
+                            }
+                        }
+                    }
+                });
+            } else {
+                // 아이콘의 경우
+                const icon = shape.querySelector('i');
+                if (icon) {
+                    if (newMode === 'stroke') {
+                        icon.style.webkitTextStroke = '2px ' + (shape.dataset.currentColor || '#6c757d');
+                        icon.style.webkitTextFillColor = 'transparent';
+                    } else {
+                        icon.style.webkitTextStroke = 'none';
+                        icon.style.webkitTextFillColor = shape.dataset.currentColor || '#6c757d';
+                        icon.style.color = shape.dataset.currentColor || '#6c757d';
+                    }
+                }
+            }
+            
+            showToast(`도형이 ${newMode === 'stroke' ? '테두리' : '채우기'} 모드로 변경되었습니다`);
+        }
+        
+        // Shape rotation with handle
+        let shapeRotating = false;
+        let shapeRotationData = null;
+        
+        function startShapeRotation(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const shape = e.target.closest('.shape-element');
+            const rect = shape.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const startAngle = Math.atan2(
+                e.clientY - centerY,
+                e.clientX - centerX
+            ) * 180 / Math.PI;
+            
+            shapeRotating = true;
+            shapeRotationData = {
+                shape: shape,
+                startAngle: startAngle,
+                currentRotation: parseInt(shape.dataset.rotation) || 0,
+                centerX: centerX,
+                centerY: centerY
+            };
+            
+            document.addEventListener('mousemove', doShapeRotation);
+            document.addEventListener('mouseup', stopShapeRotation);
+            document.body.style.cursor = 'grabbing';
+        }
+        
+        function doShapeRotation(e) {
+            if (!shapeRotating || !shapeRotationData) return;
+            
+            const rect = shapeRotationData.shape.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const currentAngle = Math.atan2(
+                e.clientY - centerY,
+                e.clientX - centerX
+            ) * 180 / Math.PI;
+            
+            const deltaAngle = currentAngle - shapeRotationData.startAngle;
+            const newRotation = Math.round(shapeRotationData.currentRotation + deltaAngle);
+            
+            shapeRotationData.shape.dataset.rotation = newRotation;
+            shapeRotationData.shape.style.transform = `rotate(${newRotation}deg)`;
+        }
+        
+        function stopShapeRotation() {
+            shapeRotating = false;
+            shapeRotationData = null;
+            document.removeEventListener('mousemove', doShapeRotation);
+            document.removeEventListener('mouseup', stopShapeRotation);
+            document.body.style.cursor = '';
+        }
+
+        // Shape resize functionality
+        let shapeResizing = false;
+        let shapeResizeData = null;
+        
+        function startShapeResize(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const shape = e.target.closest('.shape-element');
+            const handle = e.target.dataset.handle;
+            
+            shapeResizing = true;
+            shapeResizeData = {
+                shape: shape,
+                handle: handle,
+                startX: e.clientX,
+                startY: e.clientY,
+                startWidth: parseInt(shape.style.width),
+                startHeight: parseInt(shape.style.height),
+                startLeft: parseInt(shape.style.left) || 0,
+                startTop: parseInt(shape.style.top) || 0
+            };
+            
+            document.addEventListener('mousemove', doShapeResize);
+            document.addEventListener('mouseup', stopShapeResize);
+            document.body.style.cursor = getCursorForHandle(handle);
+        }
+        
+        function doShapeResize(e) {
+            if (!shapeResizing || !shapeResizeData) return;
+            
+            const dx = e.clientX - shapeResizeData.startX;
+            const dy = e.clientY - shapeResizeData.startY;
+            let newWidth = shapeResizeData.startWidth;
+            let newHeight = shapeResizeData.startHeight;
+            let newLeft = shapeResizeData.startLeft;
+            let newTop = shapeResizeData.startTop;
+            
+            switch (shapeResizeData.handle) {
+                case 'right':
+                    // 우측 핸들 - 가로만 조절
+                    newWidth = shapeResizeData.startWidth + dx;
+                    break;
+                case 'left':
+                    // 좌측 핸들 - 가로만 조절
+                    newWidth = shapeResizeData.startWidth - dx;
+                    newLeft = shapeResizeData.startLeft + dx;
+                    break;
+                case 'bottom':
+                    // 하단 핸들 - 세로만 조절
+                    newHeight = shapeResizeData.startHeight + dy;
+                    break;
+                case 'top':
+                    // 상단 핸들 - 세로만 조절
+                    newHeight = shapeResizeData.startHeight - dy;
+                    newTop = shapeResizeData.startTop + dy;
+                    break;
+                case 'bottom-right':
+                case 'bottom-left':
+                case 'top-right':
+                case 'top-left':
+                    // 모서리 핸들은 항상 비율 유지
+                    const aspectRatio = shapeResizeData.startWidth / shapeResizeData.startHeight;
+                    
+                    if (shapeResizeData.handle === 'bottom-right') {
+                        // 대각선 거리 계산
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const sign = (dx + dy) > 0 ? 1 : -1;
+                        
+                        newWidth = shapeResizeData.startWidth + (distance * sign);
+                        newHeight = newWidth / aspectRatio;
+                    } else if (shapeResizeData.handle === 'bottom-left') {
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const sign = (-dx + dy) > 0 ? 1 : -1;
+                        
+                        newWidth = shapeResizeData.startWidth + (distance * sign);
+                        newHeight = newWidth / aspectRatio;
+                        newLeft = shapeResizeData.startLeft + shapeResizeData.startWidth - newWidth;
+                    } else if (shapeResizeData.handle === 'top-right') {
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const sign = (dx - dy) > 0 ? 1 : -1;
+                        
+                        newWidth = shapeResizeData.startWidth + (distance * sign);
+                        newHeight = newWidth / aspectRatio;
+                        newTop = shapeResizeData.startTop + shapeResizeData.startHeight - newHeight;
+                    } else if (shapeResizeData.handle === 'top-left') {
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const sign = (-dx - dy) > 0 ? 1 : -1;
+                        
+                        newWidth = shapeResizeData.startWidth + (distance * sign);
+                        newHeight = newWidth / aspectRatio;
+                        newLeft = shapeResizeData.startLeft + shapeResizeData.startWidth - newWidth;
+                        newTop = shapeResizeData.startTop + shapeResizeData.startHeight - newHeight;
+                    }
+                    break;
+            }
+            
+            // Minimum size
+            newWidth = Math.max(30, newWidth);
+            newHeight = Math.max(30, newHeight);
+            
+            // Apply new dimensions
+            shapeResizeData.shape.style.width = newWidth + 'px';
+            shapeResizeData.shape.style.height = newHeight + 'px';
+            shapeResizeData.shape.style.left = newLeft + 'px';
+            shapeResizeData.shape.style.top = newTop + 'px';
+        }
+        
+        function stopShapeResize() {
+            shapeResizing = false;
+            shapeResizeData = null;
+            document.removeEventListener('mousemove', doShapeResize);
+            document.removeEventListener('mouseup', stopShapeResize);
+            document.body.style.cursor = '';
+        }
+        
+        function getCursorForHandle(handle) {
+            const cursors = {
+                'top': 'ns-resize',
+                'right': 'ew-resize',
+                'bottom': 'ns-resize',
+                'left': 'ew-resize',
+                'top-left': 'nwse-resize',
+                'top-right': 'nesw-resize',
+                'bottom-left': 'nesw-resize',
+                'bottom-right': 'nwse-resize'
+            };
+            return cursors[handle] || 'default';
+        }
+        
+        // Set page margin
+        function setPageMargin(preset) {
+            const pages = document.querySelectorAll('.page');
+            const customControls = document.getElementById('customMarginControls');
+            
+            switch(preset) {
+                case 'normal':
+                    pages.forEach(page => {
+                        page.style.padding = '40px 60px';
+                    });
+                    customControls.style.display = 'none';
+                    break;
+                case 'narrow':
+                    pages.forEach(page => {
+                        page.style.padding = '30px 30px';
+                    });
+                    customControls.style.display = 'none';
+                    break;
+                case 'none':
+                    pages.forEach(page => {
+                        page.style.padding = '0px';
+                    });
+                    customControls.style.display = 'none';
+                    break;
+                case 'wide':
+                    pages.forEach(page => {
+                        page.style.padding = '60px 80px';
+                    });
+                    customControls.style.display = 'none';
+                    break;
+                case 'custom':
+                    customControls.style.display = 'block';
+                    updateCustomMargin();
+                    break;
+            }
+            
+            showToast('페이지 여백이 변경되었습니다');
+        }
+        
+        // Update custom margin
+        function updateCustomMargin() {
+            const vertical = document.getElementById('marginVertical').value;
+            const horizontal = document.getElementById('marginHorizontal').value;
+            
+            // Update display values
+            document.getElementById('marginVerticalValue').textContent = vertical + 'px';
+            document.getElementById('marginHorizontalValue').textContent = horizontal + 'px';
+            
+            // Apply to all pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.style.padding = `${vertical}px ${horizontal}px`;
+            });
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initDocument();
+            
+            // Click outside to deselect shapes
+            document.addEventListener('click', function(e) {
+                // Check if click is outside shape elements
+                if (!e.target.closest('.shape-element') && 
+                    !e.target.closest('.shape-item') &&
+                    !e.target.closest('.image-container')) {
+                    // Deselect all shapes
+                    document.querySelectorAll('.shape-element').forEach(shape => {
+                        shape.classList.remove('selected');
+                    });
+                    selectedShape = null;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

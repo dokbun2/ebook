@@ -1,0 +1,18 @@
+title: "Your Book Title"
+subtitle: "An Optional Subtitle"
+author: "Your Name"
+date: "2025"
+language: "en"
+publisher: "Self Published"
+rights: "© 2025 Your Name. All rights reserved."
+cover-image: "src/assets/cover.jpg"
+description: |
+  A brief description of your book that will appear
+  in ebook metadata and online bookstores.
+subject:
+  - "Category 1"
+  - "Category 2"
+keywords:
+  - "keyword1"
+  - "keyword2"
+  - "keyword3"

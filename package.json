@@ -1,0 +1,25 @@
+{
+  "name": "ebook-project",
+  "version": "1.0.0",
+  "description": "A professional ebook creation and management system",
+  "main": "index.js",
+  "scripts": {
+    "build:epub": "pandoc src/chapters/*.md -o dist/book.epub --metadata-file=src/metadata/book.yaml --toc --toc-depth=2",
+    "build:pdf": "pandoc src/chapters/*.md -o dist/book.pdf --metadata-file=src/metadata/book.yaml --toc --toc-depth=2",
+    "build:html": "pandoc src/chapters/*.md -o dist/book.html --metadata-file=src/metadata/book.yaml --toc --toc-depth=2 --standalone",
+    "build:all": "npm run build:epub && npm run build:pdf && npm run build:html",
+    "clean": "rm -rf dist/*",
+    "watch": "nodemon --watch src --ext md,yaml --exec npm run build:all"
+  },
+  "keywords": [
+    "ebook",
+    "publishing",
+    "markdown",
+    "pandoc"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}

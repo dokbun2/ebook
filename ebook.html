@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전자책 제작 에디터</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn.secondary {
+            background: #95a5a6;
+        }
+
+        .btn.secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-section {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .sidebar-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .color-picker {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .format-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .format-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .format-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .format-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .main-editor {
+            flex: 1;
+            background: #e8e8e8;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            margin: 0 auto 30px;
+            padding: 20mm;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            border-radius: 8px;
+            position: relative;
+            outline: none;
+        }
+
+        .page-number {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .editor-content {
+            min-height: 250mm;
+            font-size: 16px;
+            line-height: 1.6;
+            outline: none;
+            position: relative;
+        }
+
+        .image-placeholder {
+            border: 2px dashed #ddd;
+            padding: 40px;
+            text-align: center;
+            color: #999;
+            margin: 20px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .image-placeholder.dragover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .inserted-image {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            border-radius: 4px;
+            cursor: move;
+            position: relative;
+            display: inline-block;
+        }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .image-container.selected {
+            outline: 2px solid #3498db;
+        }
+
+        .resize-handle {
+            position: absolute;
+            background: #3498db;
+            border: 2px solid white;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            cursor: nw-resize;
+        }
+
+        .resize-handle.bottom-right {
+            bottom: -5px;
+            right: -5px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+        }
+
+        .image-container.selected .delete-btn {
+            display: block;
+        }
+
+        .add-page-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .add-page-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .page-controls {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-control-btn {
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 300px;
+            }
+            
+            .page {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">📚 전자책 에디터</div>
+        <div class="toolbar">
+            <button class="btn" onclick="newDocument()">새 문서</button>
+            <button class="btn secondary" onclick="openDocument()">열기</button>
+            <button class="btn secondary" onclick="saveDocument()">저장</button>
+            <button class="btn" onclick="exportToPDF()">PDF 내보내기</button>
+            <button class="btn" onclick="exportToWord()">DOC 내보내기</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <!-- 텍스트 서식 -->
+            <div class="sidebar-section">
+                <h3>텍스트 서식</h3>
+                
+                <div class="form-group">
+                    <label>글꼴</label>
+                    <select class="form-control" id="fontFamily" onchange="applyFormat('fontFamily', this.value)">
+                        <option value="Arial">Arial</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Malgun Gothic">맑은 고딕</option>
+                        <option value="Nanum Gothic">나눔고딕</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>글자 크기</label>
+                    <input type="range" class="form-control" id="fontSize" min="8" max="72" value="16" 
+                           oninput="applyFormat('fontSize', this.value + 'px')">
+                    <span id="fontSizeValue">16px</span>
+                </div>
+
+                <div class="form-group">
+                    <label>글자 색상</label>
+                    <input type="color" class="color-picker" id="textColor" value="#000000" 
+                           onchange="applyFormat('color', this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label>배경 색상</label>
+                    <input type="color" class="color-picker" id="bgColor" value="#ffffff" 
+                           onchange="applyFormat('backgroundColor', this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label>텍스트 스타일</label>
+                    <div class="format-buttons">
+                        <button class="format-btn" onclick="toggleFormat('bold')" title="굵게"><b>B</b></button>
+                        <button class="format-btn" onclick="toggleFormat('italic')" title="기울임"><i>I</i></button>
+                        <button class="format-btn" onclick="toggleFormat('underline')" title="밑줄"><u>U</u></button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>정렬</label>
+                    <div class="format-buttons">
+                        <button class="format-btn" onclick="applyFormat('textAlign', 'left')" title="왼쪽 정렬">◀</button>
+                        <button class="format-btn" onclick="applyFormat('textAlign', 'center')" title="가운데 정렬">▬</button>
+                        <button class="format-btn" onclick="applyFormat('textAlign', 'right')" title="오른쪽 정렬">▶</button>
+                        <button class="format-btn" onclick="applyFormat('textAlign', 'justify')" title="양쪽 정렬">≡</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 이미지 삽입 -->
+            <div class="sidebar-section">
+                <h3>이미지 삽입</h3>
+                <button class="btn" onclick="document.getElementById('imageInput').click()">이미지 선택</button>
+                <input type="file" id="imageInput" class="file-input" accept="image/*" onchange="insertImage(this)">
+                <p style="margin-top: 10px; font-size: 12px; color: #666;">
+                    또는 이미지를 편집기에 직접 드래그하세요
+                </p>
+            </div>
+
+            <!-- 페이지 설정 -->
+            <div class="sidebar-section">
+                <h3>페이지 설정</h3>
+                
+                <div class="form-group">
+                    <label>줄 간격</label>
+                    <select class="form-control" onchange="applyFormat('lineHeight', this.value)">
+                        <option value="1.2">1.2</option>
+                        <option value="1.5">1.5</option>
+                        <option value="1.6" selected>1.6</option>
+                        <option value="2.0">2.0</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn" onclick="addPage()">새 페이지 추가</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-editor" id="mainEditor">
+            <div class="page" id="page1">
+                <div class="page-number">페이지 1</div>
+                <div class="page-controls">
+                    <button class="page-control-btn" onclick="deletePage(this)" title="페이지 삭제">×</button>
+                </div>
+                <div class="editor-content" contenteditable="true" 
+                     onpaste="handlePaste(event)" 
+                     ondrop="handleDrop(event)" 
+                     ondragover="handleDragOver(event)"
+                     oninput="updateContent()">
+                    <h1>전자책 제목을 입력하세요</h1>
+                    <p>여기에 내용을 작성하세요. 이미지를 드래그 앤 드롭으로 삽입할 수 있습니다.</p>
+                    <p>좌측 사이드바에서 다양한 서식을 적용할 수 있습니다.</p>
+                </div>
+            </div>
+            
+            <button class="add-page-btn" onclick="addPage()">+ 새 페이지 추가</button>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" class="file-input" accept=".json" onchange="loadDocument(this)">
+
+    <script>
+        let currentDocument = {
+            title: '새 문서',
+            pages: [],
+            settings: {
+                fontFamily: 'Arial',
+                fontSize: '16px',
+                lineHeight: '1.6'
+            }
+        };
+
+        let pageCounter = 1;
+        let selectedImage = null;
+
+        // 문서 초기화
+        function initDocument() {
+            updatePageNumbers();
+            updateFontSizeDisplay();
+        }
+
+        // 새 문서 만들기
+        function newDocument() {
+            if (confirm('현재 작업을 잃을 수 있습니다. 새 문서를 만드시겠습니까?')) {
+                location.reload();
+            }
+        }
+
+        // 서식 적용
+        function applyFormat(property, value) {
+            document.execCommand('styleWithCSS', false, true);
+            
+            if (property === 'fontFamily' || property === 'fontSize' || property === 'color' || property === 'backgroundColor' || property === 'textAlign' || property === 'lineHeight') {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    if (!range.collapsed) {
+                        const span = document.createElement('span');
+                        span.style[property] = value;
+                        try {
+                            range.surroundContents(span);
+                        } catch (e) {
+                            span.appendChild(range.extractContents());
+                            range.insertNode(span);
+                        }
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                }
+            }
+            
+            if (property === 'fontSize') {
+                updateFontSizeDisplay();
+            }
+        }
+
+        // 토글 서식 (굵게, 기울임, 밑줄)
+        function toggleFormat(command) {
+            document.execCommand(command, false, null);
+            updateFormatButtons();
+        }
+
+        // 서식 버튼 상태 업데이트
+        function updateFormatButtons() {
+            const buttons = document.querySelectorAll('.format-btn');
+            buttons.forEach(btn => {
+                const command = btn.getAttribute('onclick').match(/'(\w+)'/);
+                if (command) {
+                    if (document.queryCommandState(command[1])) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        // 글자 크기 표시 업데이트
+        function updateFontSizeDisplay() {
+            const fontSize = document.getElementById('fontSize').value;
+            document.getElementById('fontSizeValue').textContent = fontSize + 'px';
+        }
+
+        // 이미지 삽입
+        function insertImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    insertImageAtCursor(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 커서 위치에 이미지 삽입
+        function insertImageAtCursor(src) {
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'image-container';
+            imageContainer.innerHTML = `
+                <img src="${src}" class="inserted-image" onclick="selectImage(this)" draggable="false">
+                <div class="resize-handle bottom-right" onmousedown="startResize(event)"></div>
+                <button class="delete-btn" onclick="deleteImage(this)">×</button>
+            `;
+            
+            range.insertNode(imageContainer);
+            selection.collapseToEnd();
+        }
+
+        // 이미지 선택
+        function selectImage(img) {
+            // 기존 선택 해제
+            document.querySelectorAll('.image-container').forEach(container => {
+                container.classList.remove('selected');
+            });
+            
+            // 새 이미지 선택
+            img.parentElement.classList.add('selected');
+            selectedImage = img;
+        }
+
+        // 이미지 삭제
+        function deleteImage(btn) {
+            btn.parentElement.remove();
+            selectedImage = null;
+        }
+
+        // 이미지 크기 조절 시작
+        let isResizing = false;
+        let startX, startY, startWidth, startHeight;
+
+        function startResize(e) {
+            e.preventDefault();
+            isResizing = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const img = e.target.parentElement.querySelector('img');
+            startWidth = parseInt(window.getComputedStyle(img).width, 10);
+            startHeight = parseInt(window.getComputedStyle(img).height, 10);
+            
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
+        }
+
+        function doResize(e) {
+            if (!isResizing) return;
+            
+            const img = selectedImage;
+            if (!img) return;
+            
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            const newWidth = startWidth + dx;
+            const newHeight = startHeight + dy;
+            
+            if (newWidth > 50 && newHeight > 50) {
+                img.style.width = newWidth + 'px';
+                img.style.height = newHeight + 'px';
+            }
+        }
+
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener('mousemove', doResize);
+            document.removeEventListener('mouseup', stopResize);
+        }
+
+        // 드래그 앤 드롭 처리
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // 드롭 위치에 이미지 삽입
+                    const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+                    if (range) {
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        insertImageAtCursor(event.target.result);
+                    }
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        }
+
+        // 붙여넣기 처리
+        function handlePaste(e) {
+            const items = e.clipboardData.items;
+            
+            for (let item of items) {
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        insertImageAtCursor(event.target.result);
+                    };
+                    reader.readAsDataURL(blob);
+                    break;
+                }
+            }
+        }
+
+        // 새 페이지 추가
+        function addPage() {
+            pageCounter++;
+            const newPage = document.createElement('div');
+            newPage.className = 'page';
+            newPage.id = `page${pageCounter}`;
+            newPage.innerHTML = `
+                <div class="page-number">페이지 ${pageCounter}</div>
+                <div class="page-controls">
+                    <button class="page-control-btn" onclick="deletePage(this)" title="페이지 삭제">×</button>
+                </div>
+                <div class="editor-content" contenteditable="true" 
+                     onpaste="handlePaste(event)" 
+                     ondrop="handleDrop(event)" 
+                     ondragover="handleDragOver(event)"
+                     oninput="updateContent()">
+                    <p>새 페이지 내용을 입력하세요...</p>
+                </div>
+            `;
+            
+            const addButton = document.querySelector('.add-page-btn');
+            addButton.parentNode.insertBefore(newPage, addButton);
+            
+            // 새 페이지로 스크롤
+            newPage.scrollIntoView({ behavior: 'smooth' });
+            
+            showToast('새 페이지가 추가되었습니다.');
+        }
+
+        // 페이지 삭제
+        function deletePage(btn) {
+            const pages = document.querySelectorAll('.page');
+            if (pages.length <= 1) {
+                showToast('최소 1개의 페이지는 있어야 합니다.');
+                return;
+            }
+            
+            if (confirm('이 페이지를 삭제하시겠습니까?')) {
+                btn.closest('.page').remove();
+                updatePageNumbers();
+                showToast('페이지가 삭제되었습니다.');
+            }
+        }
+
+        // 페이지 번호 업데이트
+        function updatePageNumbers() {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach((page, index) => {
+                const pageNumber = page.querySelector('.page-number');
+                pageNumber.textContent = `페이지 ${index + 1}`;
+                page.id = `page${index + 1}`;
+            });
+            pageCounter = pages.length;
+        }
+
+        // 문서 저장
+        function saveDocument() {
+            const pages = Array.from(document.querySelectorAll('.page')).map(page => {
+                return {
+                    content: page.querySelector('.editor-content').innerHTML
+                };
+            });
+
+            currentDocument.pages = pages;
+            currentDocument.title = document.querySelector('h1')?.textContent || '새 문서';
+
+            const dataStr = JSON.stringify(currentDocument, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `${currentDocument.title}.json`;
+            link.click();
+            
+            showToast('문서가 저장되었습니다.');
+        }
+
+        // 문서 열기
+        function openDocument() {
+            document.getElementById('fileInput').click();
+        }
+
+        // 문서 로드
+        function loadDocument(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        loadDocumentData(data);
+                        showToast('문서가 로드되었습니다.');
+                    } catch (error) {
+                        alert('파일을 읽을 수 없습니다.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // 문서 데이터 로드
+        function loadDocumentData(data) {
+            // 기존 페이지 제거
+            document.querySelectorAll('.page').forEach(page => page.remove());
+            
+            // 새 페이지 생성
+            data.pages.forEach((pageData, index) => {
+                const page = document.createElement('div');
+                page.className = 'page';
+                page.id = `page${index + 1}`;
+                page.innerHTML = `
+                    <div class="page-number">페이지 ${index + 1}</div>
+                    <div class="page-controls">
+                        <button class="page-control-btn" onclick="deletePage(this)" title="페이지 삭제">×</button>
+                    </div>
+                    <div class="editor-content" contenteditable="true" 
+                         onpaste="handlePaste(event)" 
+                         ondrop="handleDrop(event)" 
+                         ondragover="handleDragOver(event)"
+                         oninput="updateContent()">
+                        ${pageData.content}
+                    </div>
+                `;
+                
+                const addButton = document.querySelector('.add-page-btn');
+                addButton.parentNode.insertBefore(page, addButton);
+            });
+            
+            pageCounter = data.pages.length;
+            currentDocument = data;
+        }
+
+        // PDF 내보내기
+        async function exportToPDF() {
+            showToast('PDF를 생성하고 있습니다...');
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            const pages = document.querySelectorAll('.page');
+            
+            for (let i = 0; i < pages.length; i++) {
+                if (i > 0) {
+                    pdf.addPage();
+                }
+                
+                try {
+                    const canvas = await html2canvas(pages[i], {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true
+                    });
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 210; // A4 width in mm
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                } catch (error) {
+                    console.error('페이지 렌더링 오류:', error);
+                }
+            }
+            
+            pdf.save(`${currentDocument.title || '전자책'}.pdf`);
+            showToast('PDF가 다운로드되었습니다.');
+        }
+
+        // DOC 내보내기 (단순 HTML 형태)
+        function exportToWord() {
+            let content = '';
+            const pages = document.querySelectorAll('.page .editor-content');
+            
+            pages.forEach((page, index) => {
+                content += `<div style="page-break-before: ${index > 0 ? 'always' : 'auto'};">`;
+                content += page.innerHTML;
+                content += '</div>';
+            });
+            
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>${currentDocument.title || '전자책'}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; }
+                        img { max-width: 100%; height: auto; }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([htmlContent], { type: 'application/msword' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${currentDocument.title || '전자책'}.doc`;
+            link.click();
+            
+            showToast('DOC 파일이 다운로드되었습니다.');
+        }
+
+        // 토스트 메시지 표시
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // 내용 업데이트 (자동 저장용)
+        function updateContent() {
+            // 자동 저장 로직 추가 가능
+        }
+
+        // 키보드 단축키
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveDocument();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        openDocument();
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        newDocument();
+                        break;
+                }
+            }
+        });
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initDocument();
+        });
+
+        // 이미지 컨테이너 클릭 외부 영역 클릭 시 선택 해제
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.image-container')) {
+                document.querySelectorAll('.image-container').forEach(container => {
+                    container.classList.remove('selected');
+                });
+                selectedImage = null;
+            }
+        });
+    </script>
+</body>
+</html>

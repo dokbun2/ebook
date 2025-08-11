@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전자책 스튜디오 - 당신의 이야기를 만들어보세요</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #242424;
+            --bg-card: #282828;
+            --bg-hover: #3a3a3a;
+            
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-tertiary: #808080;
+            
+            --accent-primary: #e50914; /* Netflix red */
+            --accent-secondary: #ff6b6b;
+            --accent-blue: #3ea6ff; /* YouTube blue */
+            --accent-green: #46d369;
+            --accent-purple: #8b5cf6;
+            
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+            
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a4a4a;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0.7));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 12px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+            filter: drop-shadow(0 0 20px var(--accent-primary));
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            box-shadow: 0 4px 20px rgba(229, 9, 20, 0.4);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            padding-top: 70px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .sidebar-section {
+            margin: 0;
+            padding: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            font-size: 20px;
+            color: var(--accent-blue);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(62, 166, 255, 0.1);
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        /* Color Picker */
+        .color-picker-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .color-picker {
+            width: 48px;
+            height: 48px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .color-picker:hover {
+            border-color: var(--accent-blue);
+            transform: scale(1.05);
+        }
+
+        .color-preview {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-size: 13px;
+            font-family: monospace;
+        }
+
+        /* Format Buttons */
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .format-btn {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 16px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .format-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-blue);
+        }
+
+        .format-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+
+        .format-btn.active::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+            background: var(--accent-green);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Range Slider */
+        .range-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .range-slider {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(62, 166, 255, 0.5);
+        }
+
+        .range-value {
+            min-width: 60px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Editor Area */
+        .editor-container {
+            flex: 1;
+            background: var(--bg-primary);
+            overflow-y: auto;
+            padding: 32px;
+            position: relative;
+        }
+
+        .editor-toolbar {
+            position: sticky;
+            top: -32px;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--bg-primary) 70%, transparent);
+            padding: 16px 0 32px;
+            margin: -32px -32px 0;
+            padding-left: 32px;
+            padding-right: 32px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .page-container {
+            max-width: 850px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .page {
+            background: #ffffff;
+            color: #000000;
+            margin-bottom: 32px;
+            padding: 60px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            min-height: 1122px;
+            position: relative;
+            transition: var(--transition);
+            transform-origin: top center;
+        }
+
+        .page:hover {
+            box-shadow: 0 12px 60px rgba(0,0,0,0.6);
+            transform: translateY(-4px);
+        }
+
+        .page-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 24px;
+            background: rgba(0,0,0,0.05);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-number {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .page:hover .page-actions {
+            opacity: 1;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.1);
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .page-btn:hover {
+            background: rgba(0,0,0,0.2);
+            color: #000;
+        }
+
+        .page-btn.delete:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .editor-content {
+            min-height: 900px;
+            outline: none;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .editor-content h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #000;
+        }
+
+        .editor-content h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 24px 0 16px;
+            color: #111;
+        }
+
+        .editor-content p {
+            margin-bottom: 16px;
+        }
+
+        /* Add Page Button */
+        .add-page-container {
+            max-width: 850px;
+            margin: 0 auto 32px;
+        }
+
+        .add-page-btn {
+            width: 100%;
+            padding: 48px;
+            background: var(--bg-card);
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .add-page-btn:hover {
+            border-color: var(--accent-blue);
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .add-page-icon {
+            font-size: 48px;
+            color: var(--accent-blue);
+        }
+
+        /* Image Handling */
+        .image-drop-zone {
+            border: 2px dashed rgba(62, 166, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: 48px;
+            text-align: center;
+            background: rgba(62, 166, 255, 0.05);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .image-drop-zone:hover,
+        .image-drop-zone.dragover {
+            border-color: var(--accent-blue);
+            background: rgba(62, 166, 255, 0.1);
+        }
+
+        .drop-icon {
+            font-size: 64px;
+            color: var(--accent-blue);
+            margin-bottom: 16px;
+        }
+
+        .drop-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .drop-hint {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Inserted Images */
+        .image-container {
+            position: relative;
+            display: inline-block;
+            margin: 16px 0;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .image-container:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .image-container.selected {
+            outline: 3px solid var(--accent-blue);
+            outline-offset: 3px;
+        }
+
+        .inserted-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: var(--radius-sm);
+        }
+
+        .image-controls {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .image-container:hover .image-controls {
+            opacity: 1;
+        }
+
+        .image-control-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .image-control-btn:hover {
+            background: rgba(0,0,0,0.9);
+        }
+
+        .image-control-btn.delete:hover {
+            background: var(--accent-primary);
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 400px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast.success {
+            border-color: var(--accent-green);
+        }
+
+        .toast.success .toast-icon {
+            color: var(--accent-green);
+        }
+
+        .toast.error {
+            border-color: var(--accent-primary);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--accent-primary);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: absolute;
+                left: -320px;
+                height: 100%;
+                z-index: 999;
+                box-shadow: var(--shadow-lg);
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .editor-container {
+                padding: 16px;
+            }
+
+            .page {
+                padding: 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 16px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .btn-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .page {
+                padding: 24px;
+                min-height: auto;
+            }
+
+            .editor-content h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Hover Effects */
+        .interactive {
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .interactive:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Custom Selection */
+        ::selection {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        /* File Input Hidden */
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">📚</span>
+                <span>전자책 스튜디오</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn" onclick="newDocument()">
+                    <span>➕</span>
+                    <span>새 문서</span>
+                </button>
+                <button class="btn" onclick="openDocument()">
+                    <span>📂</span>
+                    <span>열기</span>
+                </button>
+                <button class="btn" onclick="saveDocument()">
+                    <span>💾</span>
+                    <span>저장</span>
+                </button>
+                <button class="btn btn-primary" onclick="exportToPDF()">
+                    <span>📄</span>
+                    <span>PDF 내보내기</span>
+                </button>
+                <button class="btn-icon btn" onclick="toggleSidebar()" id="menuToggle">
+                    <span>☰</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <!-- 텍스트 서식 섹션 -->
+            <section class="sidebar-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="section-icon">✏️</span>
+                        <span>텍스트 서식</span>
+                    </h3>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">글꼴</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="fontFamily" onchange="applyFormat('fontFamily', this.value)">
+                            <option value="'Poppins', sans-serif">Poppins</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="'Malgun Gothic', sans-serif">맑은 고딕</option>
+                            <option value="'Nanum Gothic', sans-serif">나눔고딕</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">글자 크기</label>
+                    <div class="range-group">
+                        <input type="range" class="range-slider" id="fontSize" 
+                               min="12" max="72" value="16" 
+                               oninput="applyFormat('fontSize', this.value + 'px')">
+                        <div class="range-value" id="fontSizeValue">16px</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">색상</label>
+                    <div class="color-picker-group">
+                        <input type="color" class="color-picker" id="textColor" 
+                               value="#000000" onchange="applyFormat('color', this.value)">
+                        <div class="color-preview" id="textColorPreview">#000000</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">스타일</label>
+                    <div class="format-grid">
+                        <button class="format-btn" onclick="toggleFormat('bold')" title="굵게">
+                            <strong>B</strong>
+                        </button>
+                        <button class="format-btn" onclick="toggleFormat('italic')" title="기울임">
+                            <em>I</em>
+                        </button>
+                        <button class="format-btn" onclick="toggleFormat('underline')" title="밑줄">
+                            <u>U</u>
+                        </button>
+                        <button class="format-btn" onclick="toggleFormat('strikeThrough')" title="취소선">
+                            <s>S</s>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">정렬</label>
+                    <div class="format-grid">
+                        <button class="format-btn" onclick="applyFormat('textAlign', 'left')" title="왼쪽">
+                            ◀
+                        </button>
+                        <button class="format-btn" onclick="applyFormat('textAlign', 'center')" title="가운데">
+                            ⬛
+                        </button>
+                        <button class="format-btn" onclick="applyFormat('textAlign', 'right')" title="오른쪽">
+                            ▶
+                        </button>
+                        <button class="format-btn" onclick="applyFormat('textAlign', 'justify')" title="양쪽">
+                            ☰
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 이미지 섹션 -->
+            <section class="sidebar-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="section-icon">🖼️</span>
+                        <span>이미지</span>
+                    </h3>
+                </div>
+
+                <div class="image-drop-zone" onclick="document.getElementById('imageInput').click()"
+                     ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                    <div class="drop-icon">📸</div>
+                    <div class="drop-text">이미지 업로드</div>
+                    <div class="drop-hint">클릭하거나 드래그하여 업로드</div>
+                </div>
+                <input type="file" id="imageInput" class="file-input" 
+                       accept="image/*" onchange="insertImage(this)">
+            </section>
+
+            <!-- 페이지 설정 섹션 -->
+            <section class="sidebar-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="section-icon">📄</span>
+                        <span>페이지 설정</span>
+                    </h3>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">줄 간격</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" onchange="applyFormat('lineHeight', this.value)">
+                            <option value="1.4">좁게 (1.4)</option>
+                            <option value="1.6">보통 (1.6)</option>
+                            <option value="1.8" selected>넓게 (1.8)</option>
+                            <option value="2.0">더 넓게 (2.0)</option>
+                            <option value="2.5">매우 넓게 (2.5)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%;" onclick="addPage()">
+                    <span>➕</span>
+                    <span>새 페이지 추가</span>
+                </button>
+            </section>
+        </aside>
+
+        <main class="editor-container">
+            <div class="editor-toolbar">
+                <div class="toolbar-actions">
+                    <button class="btn" onclick="insertHeading(1)">
+                        <span>H1</span>
+                    </button>
+                    <button class="btn" onclick="insertHeading(2)">
+                        <span>H2</span>
+                    </button>
+                    <button class="btn" onclick="insertList('ul')">
+                        <span>• 목록</span>
+                    </button>
+                    <button class="btn" onclick="insertList('ol')">
+                        <span>1. 목록</span>
+                    </button>
+                    <button class="btn" onclick="insertQuote()">
+                        <span>인용구</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="pagesContainer">
+                <div class="page-container">
+                    <div class="page" id="page1">
+                        <div class="page-header">
+                            <div class="page-number">페이지 1</div>
+                            <div class="page-actions">
+                                <button class="page-btn delete" onclick="deletePage(this)" title="삭제">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                        <div class="editor-content" contenteditable="true" 
+                             onpaste="handlePaste(event)" 
+                             ondrop="handleDrop(event)" 
+                             ondragover="handleDragOver(event)"
+                             oninput="updateContent()">
+                            <h1>당신의 이야기를 시작하세요</h1>
+                            <p>이곳에서 창의적인 글쓰기를 시작해보세요. 현대적이고 아름다운 인터페이스로 전자책을 만들어보세요.</p>
+                            <p>텍스트를 선택하고 좌측 사이드바에서 다양한 서식을 적용할 수 있습니다. 이미지는 드래그 앤 드롭으로 쉽게 삽입할 수 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="add-page-container">
+                    <button class="add-page-btn" onclick="addPage()">
+                        <div class="add-page-icon">➕</div>
+                        <div>새 페이지 추가</div>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <input type="file" id="fileInput" class="file-input" accept=".json" onchange="loadDocument(this)">
+
+    <script>
+        let currentDocument = {
+            title: '새 문서',
+            pages: [],
+            settings: {
+                fontFamily: "'Poppins', sans-serif",
+                fontSize: '16px',
+                lineHeight: '1.8'
+            }
+        };
+
+        let pageCounter = 1;
+        let selectedImage = null;
+        let sidebarOpen = false;
+
+        // Initialize
+        function initDocument() {
+            updatePageNumbers();
+            updateFontSizeDisplay();
+            setupEventListeners();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Font size slider
+            document.getElementById('fontSize').addEventListener('input', function() {
+                document.getElementById('fontSizeValue').textContent = this.value + 'px';
+            });
+
+            // Color picker preview
+            document.getElementById('textColor').addEventListener('input', function() {
+                document.getElementById('textColorPreview').textContent = this.value;
+                document.getElementById('textColorPreview').style.background = this.value;
+                document.getElementById('textColorPreview').style.color = getContrastColor(this.value);
+            });
+
+            // Click outside to deselect images
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.image-container')) {
+                    document.querySelectorAll('.image-container').forEach(container => {
+                        container.classList.remove('selected');
+                    });
+                    selectedImage = null;
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                        case 's':
+                            e.preventDefault();
+                            saveDocument();
+                            break;
+                        case 'o':
+                            e.preventDefault();
+                            openDocument();
+                            break;
+                        case 'n':
+                            e.preventDefault();
+                            newDocument();
+                            break;
+                        case 'b':
+                            e.preventDefault();
+                            toggleFormat('bold');
+                            break;
+                        case 'i':
+                            e.preventDefault();
+                            toggleFormat('italic');
+                            break;
+                        case 'u':
+                            e.preventDefault();
+                            toggleFormat('underline');
+                            break;
+                    }
+                }
+            });
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebarOpen = !sidebarOpen;
+            if (sidebarOpen) {
+                sidebar.classList.add('open');
+            } else {
+                sidebar.classList.remove('open');
+            }
+        }
+
+        // Get contrast color for text
+        function getContrastColor(hexcolor) {
+            const r = parseInt(hexcolor.substr(1, 2), 16);
+            const g = parseInt(hexcolor.substr(3, 2), 16);
+            const b = parseInt(hexcolor.substr(5, 2), 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 128) ? 'black' : 'white';
+        }
+
+        // New document
+        function newDocument() {
+            if (confirm('현재 작업을 잃을 수 있습니다. 새 문서를 만드시겠습니까?')) {
+                location.reload();
+            }
+        }
+
+        // Apply format
+        function applyFormat(property, value) {
+            document.execCommand('styleWithCSS', false, true);
+            
+            if (property === 'fontFamily' || property === 'fontSize' || 
+                property === 'color' || property === 'backgroundColor' || 
+                property === 'textAlign' || property === 'lineHeight') {
+                
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    if (!range.collapsed) {
+                        const span = document.createElement('span');
+                        span.style[property] = value;
+                        try {
+                            range.surroundContents(span);
+                        } catch (e) {
+                            span.appendChild(range.extractContents());
+                            range.insertNode(span);
+                        }
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                }
+            }
+            
+            if (property === 'fontSize') {
+                updateFontSizeDisplay();
+            }
+        }
+
+        // Toggle format
+        function toggleFormat(command) {
+            document.execCommand(command, false, null);
+            updateFormatButtons();
+        }
+
+        // Update format buttons
+        function updateFormatButtons() {
+            const buttons = document.querySelectorAll('.format-btn');
+            buttons.forEach(btn => {
+                const command = btn.getAttribute('onclick').match(/'(\w+)'/);
+                if (command) {
+                    if (document.queryCommandState(command[1])) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        // Update font size display
+        function updateFontSizeDisplay() {
+            const fontSize = document.getElementById('fontSize').value;
+            document.getElementById('fontSizeValue').textContent = fontSize + 'px';
+        }
+
+        // Insert heading
+        function insertHeading(level) {
+            document.execCommand('formatBlock', false, `h${level}`);
+        }
+
+        // Insert list
+        function insertList(type) {
+            if (type === 'ul') {
+                document.execCommand('insertUnorderedList', false, null);
+            } else {
+                document.execCommand('insertOrderedList', false, null);
+            }
+        }
+
+        // Insert quote
+        function insertQuote() {
+            document.execCommand('formatBlock', false, 'blockquote');
+        }
+
+        // Insert image
+        function insertImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    insertImageAtCursor(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Insert image at cursor
+        function insertImageAtCursor(src) {
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'image-container';
+            imageContainer.innerHTML = `
+                <img src="${src}" class="inserted-image" onclick="selectImage(this)" draggable="false">
+                <div class="image-controls">
+                    <button class="image-control-btn delete" onclick="deleteImage(this)" title="삭제">
+                        ✕
+                    </button>
+                </div>
+            `;
+            
+            range.insertNode(imageContainer);
+            selection.collapseToEnd();
+            
+            showToast('이미지가 추가되었습니다', 'success');
+        }
+
+        // Select image
+        function selectImage(img) {
+            // Deselect all
+            document.querySelectorAll('.image-container').forEach(container => {
+                container.classList.remove('selected');
+            });
+            
+            // Select clicked image
+            img.parentElement.classList.add('selected');
+            selectedImage = img;
+        }
+
+        // Delete image
+        function deleteImage(btn) {
+            btn.closest('.image-container').remove();
+            selectedImage = null;
+            showToast('이미지가 삭제되었습니다', 'success');
+        }
+
+        // Drag and drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            if (e.target.classList.contains('image-drop-zone')) {
+                e.target.classList.add('dragover');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (e.target.classList.contains('image-drop-zone')) {
+                e.target.classList.remove('dragover');
+            }
+            
+            const files = e.dataTransfer.files;
+            
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Find drop position
+                    const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+                    if (range) {
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        insertImageAtCursor(event.target.result);
+                    }
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        }
+
+        // Handle paste
+        function handlePaste(e) {
+            const items = e.clipboardData.items;
+            
+            for (let item of items) {
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        insertImageAtCursor(event.target.result);
+                    };
+                    reader.readAsDataURL(blob);
+                    break;
+                }
+            }
+        }
+
+        // Add page
+        function addPage() {
+            pageCounter++;
+            const pageContainer = document.createElement('div');
+            pageContainer.className = 'page-container';
+            pageContainer.style.animation = 'fadeIn 0.6s ease-out';
+            
+            pageContainer.innerHTML = `
+                <div class="page" id="page${pageCounter}">
+                    <div class="page-header">
+                        <div class="page-number">페이지 ${pageCounter}</div>
+                        <div class="page-actions">
+                            <button class="page-btn delete" onclick="deletePage(this)" title="삭제">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                    <div class="editor-content" contenteditable="true" 
+                         onpaste="handlePaste(event)" 
+                         ondrop="handleDrop(event)" 
+                         ondragover="handleDragOver(event)"
+                         oninput="updateContent()">
+                        <p>새 페이지 내용을 입력하세요...</p>
+                    </div>
+                </div>
+            `;
+            
+            const addPageContainer = document.querySelector('.add-page-container');
+            addPageContainer.parentNode.insertBefore(pageContainer, addPageContainer);
+            
+            // Scroll to new page
+            pageContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            showToast('새 페이지가 추가되었습니다', 'success');
+        }
+
+        // Delete page
+        function deletePage(btn) {
+            const pages = document.querySelectorAll('.page');
+            if (pages.length <= 1) {
+                showToast('최소 1개의 페이지는 있어야 합니다', 'error');
+                return;
+            }
+            
+            if (confirm('이 페이지를 삭제하시겠습니까?')) {
+                const pageContainer = btn.closest('.page-container');
+                pageContainer.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    pageContainer.remove();
+                    updatePageNumbers();
+                    showToast('페이지가 삭제되었습니다', 'success');
+                }, 300);
+            }
+        }
+
+        // Update page numbers
+        function updatePageNumbers() {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach((page, index) => {
+                const pageNumber = page.querySelector('.page-number');
+                pageNumber.textContent = `페이지 ${index + 1}`;
+                page.id = `page${index + 1}`;
+            });
+            pageCounter = pages.length;
+        }
+
+        // Save document
+        function saveDocument() {
+            const pages = Array.from(document.querySelectorAll('.page')).map(page => {
+                return {
+                    content: page.querySelector('.editor-content').innerHTML
+                };
+            });
+
+            currentDocument.pages = pages;
+            currentDocument.title = document.querySelector('h1')?.textContent || '새 문서';
+
+            const dataStr = JSON.stringify(currentDocument, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `${currentDocument.title}.json`;
+            link.click();
+            
+            showToast('문서가 저장되었습니다', 'success');
+        }
+
+        // Open document
+        function openDocument() {
+            document.getElementById('fileInput').click();
+        }
+
+        // Load document
+        function loadDocument(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        loadDocumentData(data);
+                        showToast('문서가 로드되었습니다', 'success');
+                    } catch (error) {
+                        showToast('파일을 읽을 수 없습니다', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Load document data
+        function loadDocumentData(data) {
+            // Remove existing pages
+            document.querySelectorAll('.page-container').forEach(container => container.remove());
+            
+            // Create new pages
+            data.pages.forEach((pageData, index) => {
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'page-container';
+                
+                pageContainer.innerHTML = `
+                    <div class="page" id="page${index + 1}">
+                        <div class="page-header">
+                            <div class="page-number">페이지 ${index + 1}</div>
+                            <div class="page-actions">
+                                <button class="page-btn delete" onclick="deletePage(this)" title="삭제">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                        <div class="editor-content" contenteditable="true" 
+                             onpaste="handlePaste(event)" 
+                             ondrop="handleDrop(event)" 
+                             ondragover="handleDragOver(event)"
+                             oninput="updateContent()">
+                            ${pageData.content}
+                        </div>
+                    </div>
+                `;
+                
+                const addPageContainer = document.querySelector('.add-page-container');
+                addPageContainer.parentNode.insertBefore(pageContainer, addPageContainer);
+            });
+            
+            pageCounter = data.pages.length;
+            currentDocument = data;
+        }
+
+        // Export to PDF
+        async function exportToPDF() {
+            showToast('PDF를 생성하고 있습니다...', 'success');
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            const pages = document.querySelectorAll('.page');
+            
+            for (let i = 0; i < pages.length; i++) {
+                if (i > 0) {
+                    pdf.addPage();
+                }
+                
+                try {
+                    const canvas = await html2canvas(pages[i], {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff'
+                    });
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 210; // A4 width in mm
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                } catch (error) {
+                    console.error('페이지 렌더링 오류:', error);
+                }
+            }
+            
+            pdf.save(`${currentDocument.title || '전자책'}.pdf`);
+            showToast('PDF가 다운로드되었습니다', 'success');
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? '✓' : '⚠️';
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Update content
+        function updateContent() {
+            // Auto-save logic can be added here
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initDocument();
+        });
+    </script>
+</body>
+</html>

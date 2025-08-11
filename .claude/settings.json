@@ -1,0 +1,31 @@
+{
+  "project": {
+    "name": "Ebook Project",
+    "description": "A project for creating and managing ebooks",
+    "type": "documentation"
+  },
+  "environment": {
+    "language": "javascript",
+    "framework": "none",
+    "tools": [
+      "markdown",
+      "epub",
+      "pdf"
+    ]
+  },
+  "conventions": {
+    "fileStructure": {
+      "chapters": "src/chapters/",
+      "assets": "src/assets/",
+      "output": "dist/"
+    },
+    "naming": {
+      "chapters": "chapter-XX-title.md",
+      "images": "kebab-case.png"
+    }
+  },
+  "documentation": {
+    "readme": true,
+    "style": "markdown"
+  }
+}
