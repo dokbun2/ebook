@@ -1143,8 +1143,8 @@
         }
 
         .lego-color-button {
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -1153,16 +1153,40 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .lego-color-button-small {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
             color: rgba(255, 255, 255, 0.8);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .lego-color-button:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         .lego-color-button:active {
+            transform: translateY(0);
+        }
+        
+        .lego-color-button-small:hover {
+            transform: translateY(-1px);
+        }
+        
+        .lego-color-button-small:active {
             transform: translateY(0);
         }
 
@@ -1178,6 +1202,37 @@
             font-size: 12px;
             transition: all 0.2s ease;
         }
+        
+        .color-code-input-small {
+            width: 65px;
+            height: 24px;
+            padding: 2px 6px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: 'Paperlogy', monospace;
+            font-size: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .color-controls-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .color-control-item {
+            flex: 1;
+        }
+        
+        .form-label-small {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
 
         .color-code-input:hover {
             border-color: var(--primary);
@@ -1187,6 +1242,157 @@
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+        
+        /* Table Creator Styles */
+        .table-creator-container {
+            padding: 10px 0;
+        }
+        
+        .table-size-selector {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 2px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            max-width: 220px;
+            margin: 0 auto 10px;
+        }
+        
+        .table-grid-cell {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        
+        .table-grid-cell:hover,
+        .table-grid-cell.highlighted {
+            background: #007AFF;
+            border-color: #0051D5;
+        }
+        
+        .table-size-display {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        /* Draggable Table Styles */
+        .draggable-table {
+            position: absolute;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: move;
+            min-width: 100px;
+            min-height: 50px;
+        }
+        
+        .draggable-table.selected {
+            outline: 2px solid #007AFF;
+            outline-offset: 2px;
+        }
+        
+        .draggable-table.selected .table-spacing-handles {
+            display: block !important;
+        }
+        
+        .draggable-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            min-width: 80px;
+            min-height: 30px;
+            position: relative;
+            background: white;
+            cursor: text;
+        }
+        
+        .draggable-table td:hover {
+            background: #f8f9fa;
+        }
+        
+        .draggable-table td.selected-cell {
+            background: #e3f2fd;
+        }
+        
+        /* Table Resize Handles */
+        .table-resize-handle {
+            position: absolute;
+            background: #007AFF;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .draggable-table.selected .table-resize-handle {
+            opacity: 1;
+        }
+        
+        .table-resize-handle:hover {
+            opacity: 1 !important;
+        }
+        
+        .table-resize-handle.right {
+            right: -3px;
+            top: 0;
+            width: 6px;
+            height: 100%;
+            cursor: col-resize;
+        }
+        
+        .table-resize-handle.bottom {
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            cursor: row-resize;
+        }
+        
+        .table-resize-handle.corner {
+            right: -3px;
+            bottom: -3px;
+            width: 10px;
+            height: 10px;
+            cursor: nwse-resize;
+            background: #007AFF;
+            border-radius: 2px;
+        }
+        
+        /* Table Controls */
+        .table-controls {
+            position: absolute;
+            top: -35px;
+            right: 0;
+            display: none;
+            gap: 5px;
+            background: white;
+            padding: 4px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .draggable-table.selected .table-controls {
+            display: flex;
+        }
+        
+        .table-control-btn {
+            padding: 4px 8px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .table-control-btn:hover {
+            background: #f5f5f5;
+            border-color: #007AFF;
         }
 
         .color-picker::-webkit-color-swatch-wrapper {
@@ -2010,25 +2216,58 @@
                             </button>
                         </div>
 
-                        <!-- Text Color -->
-                        <div class="form-group">
-                            <label class="form-label">글자 색상</label>
-                            <div class="color-group">
+                        <!-- Text and Background Colors -->
+                        <div class="color-controls-row">
+                            <div class="color-control-item">
+                                <label class="form-label-small">글자</label>
                                 <div class="color-picker-wrapper">
-                                    <button id="textColorButton" class="lego-color-button" 
+                                    <button id="textColorButton" class="lego-color-button-small" 
                                             onclick="openTextColorPicker()"
                                             style="background: #212529; 
-                                                   box-shadow: 0 2px 0 0 #191c1f, 0 4px 0 0 #0f1113, 0 4px 8px rgba(0,0,0,0.2);
-                                                   font-size: 16px;">
+                                                   box-shadow: 0 1px 0 0 #191c1f, 0 1px 0 0 #0f1113, 0 1px 2px rgba(0,0,0,0.2);">
                                         🎨
                                     </button>
                                     <input type="hidden" id="textColor" value="#212529">
-                                    <input type="text" class="color-code-input" id="textColorCode" value="#212529" 
+                                    <input type="text" class="color-code-input-small" id="textColorCode" value="#212529" 
                                            placeholder="#000000"
                                            onchange="updateColorFromCode('text', this.value)">
                                 </div>
-                                <span class="form-label" id="textColorValue">#212529</span>
                             </div>
+                            <div class="color-control-item">
+                                <label class="form-label-small">배경</label>
+                                <div class="color-picker-wrapper">
+                                    <button id="bgColorButton" class="lego-color-button-small" 
+                                            onclick="openBgColorPicker()"
+                                            style="background: #FFFFFF; 
+                                                   box-shadow: 0 1px 0 0 #e0e0e0, 0 1px 0 0 #cccccc, 0 1px 2px rgba(0,0,0,0.2);
+                                                   border: 1px solid #ddd;">
+                                        🎨
+                                    </button>
+                                    <input type="hidden" id="bgColor" value="#FFFFFF">
+                                    <input type="text" class="color-code-input-small" id="bgColorCode" value="#FFFFFF" 
+                                           placeholder="#FFFFFF"
+                                           onchange="updateColorFromCode('bg', this.value)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 표 만들기 섹션 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="section-title">표 만들기</span>
+                        <i class="fas fa-chevron-down section-toggle"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="table-creator-container">
+                            <div class="table-size-selector" id="tableSizeSelector">
+                                <!-- Table grid will be generated here -->
+                            </div>
+                            <div class="table-size-display" id="tableSizeDisplay">0 × 0</div>
+                            <button class="btn btn-primary" onclick="createTable()" style="width: 100%; margin-top: 10px;">
+                                <i class="fas fa-table"></i> 표 삽입
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -2354,7 +2593,8 @@
         function setupEventListeners() {
             // Color picker
             document.getElementById('textColor').addEventListener('input', function() {
-                document.getElementById('textColorValue').textContent = this.value;
+                // Color value is now shown in textColorCode input
+                document.getElementById('textColorCode').value = this.value;
             });
 
             // Document title
@@ -2546,8 +2786,40 @@
             }
             // Color의 경우
             else if (property === 'color') {
-                document.execCommand('styleWithCSS', false, true);
-                document.execCommand('foreColor', false, value);
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    
+                    // 선택된 텍스트가 있는 경우
+                    if (!range.collapsed) {
+                        // 선택된 컨텐츠를 span으로 감싸서 색상 적용
+                        const selectedContent = range.extractContents();
+                        const span = document.createElement('span');
+                        span.style.color = value;
+                        span.appendChild(selectedContent);
+                        range.insertNode(span);
+                        
+                        // 선택 영역 복원
+                        selection.removeAllRanges();
+                        const newRange = document.createRange();
+                        newRange.selectNodeContents(span);
+                        selection.addRange(newRange);
+                    } else {
+                        // 선택된 텍스트가 없는 경우 - 새로 입력될 텍스트에 적용
+                        // 임시 span 생성
+                        const span = document.createElement('span');
+                        span.style.color = value;
+                        span.innerHTML = '&#8203;'; // Zero-width space
+                        range.insertNode(span);
+                        
+                        // 커서를 span 안으로 이동
+                        const newRange = document.createRange();
+                        newRange.setStart(span, 0);
+                        newRange.setEnd(span, 0);
+                        selection.removeAllRanges();
+                        selection.addRange(newRange);
+                    }
+                }
             }
             // Font weight의 경우
             else if (property === 'fontWeight') {
@@ -4375,6 +4647,15 @@
         
         // Open text color picker dialog
         function openTextColorPicker() {
+            let selectedColor = document.getElementById('textColorCode')?.value || '#212529';
+            
+            // Save current selection
+            const selection = window.getSelection();
+            let savedRange = null;
+            if (selection.rangeCount > 0) {
+                savedRange = selection.getRangeAt(0).cloneRange();
+            }
+            
             // Create overlay
             const overlay = document.createElement('div');
             overlay.style.cssText = `
@@ -4394,33 +4675,55 @@
             const dialog = document.createElement('div');
             dialog.style.cssText = `
                 background: white;
-                padding: 20px;
-                border-radius: 12px;
+                padding: 12px;
+                border-radius: 10px;
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
                 max-width: 90%;
-                width: 480px;
-                max-height: 90vh;
+                width: 320px;
+                max-height: 80vh;
                 overflow-y: auto;
             `;
 
-            // Title
+            // Title with preview
+            const titleContainer = document.createElement('div');
+            titleContainer.style.cssText = `
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 12px;
+            `;
+            
             const title = document.createElement('h3');
             title.textContent = '텍스트 색상 선택';
             title.style.cssText = `
-                margin: 0 0 20px 0;
-                font-size: 18px;
+                margin: 0;
+                font-size: 16px;
                 font-weight: bold;
                 color: #333;
             `;
-            dialog.appendChild(title);
+            
+            const preview = document.createElement('div');
+            preview.id = 'colorPreview';
+            preview.style.cssText = `
+                width: 24px;
+                height: 24px;
+                background: ${selectedColor};
+                border-radius: 4px;
+                border: 1px solid #ddd;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            `;
+            
+            titleContainer.appendChild(title);
+            titleContainer.appendChild(preview);
+            dialog.appendChild(titleContainer);
 
             // Color grid
             const colorGrid = document.createElement('div');
             colorGrid.style.cssText = `
                 display: grid;
                 grid-template-columns: repeat(8, 1fr);
-                gap: 10px;
-                margin-bottom: 20px;
+                gap: 6px;
+                margin-bottom: 12px;
             `;
 
             // LEGO-style color blocks
@@ -4475,61 +4778,57 @@
                     width: 100%;
                     aspect-ratio: 1;
                     background: ${color};
-                    border-radius: 6px;
+                    border-radius: 4px;
                     cursor: pointer;
                     position: relative;
                     transition: all 0.2s;
                     box-shadow: 
-                        0 2px 0 0 ${adjustColor(color, -30)},
-                        0 4px 0 0 ${adjustColor(color, -50)},
-                        0 4px 8px rgba(0,0,0,0.2);
+                        0 1px 0 0 ${adjustColor(color, -30)},
+                        0 2px 0 0 ${adjustColor(color, -50)},
+                        0 2px 4px rgba(0,0,0,0.2);
                     transform: translateY(0);
+                    border: ${color === '#FFFFFF' ? '1px solid #e0e0e0' : 'none'};
                 `;
 
                 // Hover effect
                 block.addEventListener('mouseenter', () => {
-                    block.style.transform = 'translateY(-2px)';
+                    block.style.transform = 'translateY(-1px)';
                     block.style.boxShadow = `
-                        0 4px 0 0 ${adjustColor(color, -30)},
-                        0 6px 0 0 ${adjustColor(color, -50)},
-                        0 6px 12px rgba(0,0,0,0.3)
+                        0 2px 0 0 ${adjustColor(color, -30)},
+                        0 3px 0 0 ${adjustColor(color, -50)},
+                        0 3px 6px rgba(0,0,0,0.3)
                     `;
                 });
 
                 block.addEventListener('mouseleave', () => {
                     block.style.transform = 'translateY(0)';
                     block.style.boxShadow = `
-                        0 2px 0 0 ${adjustColor(color, -30)},
-                        0 4px 0 0 ${adjustColor(color, -50)},
-                        0 4px 8px rgba(0,0,0,0.2)
+                        0 1px 0 0 ${adjustColor(color, -30)},
+                        0 2px 0 0 ${adjustColor(color, -50)},
+                        0 2px 4px rgba(0,0,0,0.2)
                     `;
                 });
 
                 // Click event
                 block.addEventListener('click', () => {
-                    // Update text color button background
-                    const textColorButton = document.getElementById('textColorButton');
-                    if (textColorButton) {
-                        textColorButton.style.background = color;
-                        // Update button shadow with darker colors
-                        textColorButton.style.boxShadow = `
-                            0 2px 0 0 ${adjustColor(color, -30)},
-                            0 4px 0 0 ${adjustColor(color, -50)},
-                            0 4px 8px rgba(0,0,0,0.2)
-                        `;
+                    // Update selected color
+                    selectedColor = color;
+                    
+                    // Update preview
+                    const preview = document.getElementById('colorPreview');
+                    if (preview) {
+                        preview.style.background = color;
                     }
-                    // Update color code display
-                    const colorCode = document.getElementById('textColorCode');
-                    if (colorCode) {
-                        colorCode.value = color.toUpperCase();
-                    }
-                    const colorValue = document.getElementById('textColorValue');
-                    if (colorValue) {
-                        colorValue.textContent = color.toUpperCase();
-                    }
-                    // Apply color to text
-                    applyFormat('color', color);
-                    document.body.removeChild(overlay);
+                    
+                    // Update input field
+                    colorInput.value = color.toUpperCase();
+                    
+                    // Add selected style to this block and remove from others
+                    colorGrid.querySelectorAll('div').forEach(b => {
+                        b.style.outline = 'none';
+                    });
+                    block.style.outline = '2px solid #007AFF';
+                    block.style.outlineOffset = '2px';
                 });
 
                 // Tooltip
@@ -4543,91 +4842,123 @@
             // Color code input
             const inputContainer = document.createElement('div');
             inputContainer.style.cssText = `
-                display: flex;
-                gap: 10px;
-                margin-bottom: 20px;
-                align-items: center;
+                margin-bottom: 12px;
             `;
 
             const colorInput = document.createElement('input');
             colorInput.type = 'text';
-            colorInput.value = document.getElementById('textColorCode')?.value || '#212529';
+            colorInput.value = selectedColor;
             colorInput.placeholder = '#000000';
             colorInput.style.cssText = `
-                flex: 1;
-                padding: 8px 12px;
-                border: 2px solid #ddd;
+                width: 100%;
+                padding: 6px 10px;
+                border: 1px solid #ddd;
                 border-radius: 6px;
-                font-size: 14px;
+                font-size: 13px;
                 font-family: monospace;
+                box-sizing: border-box;
             `;
 
-            const applyButton = document.createElement('button');
-            applyButton.textContent = '적용';
-            applyButton.style.cssText = `
-                padding: 8px 20px;
-                background: #007AFF;
-                color: #ffffff;
-                border: none;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: bold;
-            `;
-
-            applyButton.addEventListener('click', () => {
+            // Real-time update on input
+            colorInput.addEventListener('input', () => {
                 const color = colorInput.value;
                 if (/^#[0-9A-F]{6}$/i.test(color)) {
-                    // Update text color button background
-                    const textColorButton = document.getElementById('textColorButton');
-                    if (textColorButton) {
-                        textColorButton.style.background = color;
-                        textColorButton.style.boxShadow = `
-                            0 2px 0 0 ${adjustColor(color, -30)},
-                            0 4px 0 0 ${adjustColor(color, -50)},
-                            0 4px 8px rgba(0,0,0,0.2)
-                        `;
+                    selectedColor = color;
+                    // Update preview
+                    const preview = document.getElementById('colorPreview');
+                    if (preview) {
+                        preview.style.background = color;
                     }
-                    // Update color code display
-                    const colorCode = document.getElementById('textColorCode');
-                    if (colorCode) {
-                        colorCode.value = color.toUpperCase();
-                    }
-                    const colorValue = document.getElementById('textColorValue');
-                    if (colorValue) {
-                        colorValue.textContent = color.toUpperCase();
-                    }
-                    // Apply color to text
-                    applyFormat('color', color);
-                    document.body.removeChild(overlay);
-                } else {
-                    alert('올바른 색상 코드를 입력해주세요. (예: #FF0000)');
+                    // Remove selection from color blocks
+                    colorGrid.querySelectorAll('div').forEach(b => {
+                        b.style.outline = 'none';
+                    });
                 }
             });
 
             inputContainer.appendChild(colorInput);
-            inputContainer.appendChild(applyButton);
             dialog.appendChild(inputContainer);
+
+            // Button container
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = `
+                display: flex;
+                gap: 8px;
+                margin-top: 8px;
+            `;
+
+            // Save button
+            const saveButton = document.createElement('button');
+            saveButton.textContent = '저장';
+            saveButton.style.cssText = `
+                flex: 1;
+                padding: 8px;
+                background: #007AFF;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: bold;
+            `;
+            saveButton.addEventListener('click', () => {
+                // Update text color button background
+                const textColorButton = document.getElementById('textColorButton');
+                if (textColorButton) {
+                    textColorButton.style.background = selectedColor;
+                    textColorButton.style.boxShadow = `
+                        0 1px 0 0 ${adjustColor(selectedColor, -30)},
+                        0 2px 0 0 ${adjustColor(selectedColor, -50)},
+                        0 2px 4px rgba(0,0,0,0.2)
+                    `;
+                }
+                // Update color code display
+                const colorCode = document.getElementById('textColorCode');
+                if (colorCode) {
+                    colorCode.value = selectedColor.toUpperCase();
+                }
+                // Restore selection and apply color
+                const editorContent = document.querySelector('.editor-content');
+                if (editorContent) {
+                    editorContent.focus();
+                    
+                    // Restore saved selection
+                    if (savedRange) {
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(savedRange);
+                    }
+                    
+                    // Apply color to text
+                    applyFormat('color', selectedColor);
+                    showToast('텍스트 색상이 적용되었습니다');
+                    document.body.removeChild(overlay);
+                } else {
+                    showToast('에디터를 찾을 수 없습니다');
+                }
+            });
+            buttonContainer.appendChild(saveButton);
 
             // Close button
             const closeButton = document.createElement('button');
             closeButton.textContent = '닫기';
             closeButton.style.cssText = `
-                width: 100%;
-                padding: 10px;
+                flex: 1;
+                padding: 8px;
                 background: #f0f0f0;
                 border: none;
                 border-radius: 6px;
                 cursor: pointer;
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: bold;
             `;
 
             closeButton.addEventListener('click', () => {
                 document.body.removeChild(overlay);
             });
+            buttonContainer.appendChild(closeButton);
 
-            dialog.appendChild(closeButton);
+            dialog.appendChild(buttonContainer);
 
             // Overlay click to close
             overlay.addEventListener('click', (e) => {
@@ -5203,21 +5534,987 @@
         // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
             initDocument();
+            initTableCreator();
             
-            // Click outside to deselect shapes
+            // Click outside to deselect shapes and tables
             document.addEventListener('click', function(e) {
                 // Check if click is outside shape elements
                 if (!e.target.closest('.shape-element') && 
                     !e.target.closest('.shape-item') &&
-                    !e.target.closest('.image-container')) {
+                    !e.target.closest('.image-container') &&
+                    !e.target.closest('.draggable-table')) {
                     // Deselect all shapes
                     document.querySelectorAll('.shape-element').forEach(shape => {
                         shape.classList.remove('selected');
                     });
                     selectedShape = null;
+                    
+                    // Deselect all tables
+                    document.querySelectorAll('.draggable-table').forEach(table => {
+                        table.classList.remove('selected');
+                    });
                 }
             });
         });
+        
+        // Table Creator Functions
+        let selectedTableSize = { rows: 0, cols: 0 };
+        let tableIdCounter = 0;
+        
+        function initTableCreator() {
+            const selector = document.getElementById('tableSizeSelector');
+            if (!selector) return;
+            
+            // Create 10x10 grid
+            for (let row = 1; row <= 10; row++) {
+                for (let col = 1; col <= 10; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'table-grid-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    cell.addEventListener('mouseenter', function() {
+                        highlightTableGrid(row, col);
+                    });
+                    
+                    cell.addEventListener('click', function() {
+                        selectedTableSize = { rows: row, cols: col };
+                        createTable();
+                    });
+                    
+                    selector.appendChild(cell);
+                }
+            }
+            
+            selector.addEventListener('mouseleave', function() {
+                clearTableGridHighlight();
+            });
+        }
+        
+        function highlightTableGrid(rows, cols) {
+            const cells = document.querySelectorAll('.table-grid-cell');
+            cells.forEach(cell => {
+                const cellRow = parseInt(cell.dataset.row);
+                const cellCol = parseInt(cell.dataset.col);
+                if (cellRow <= rows && cellCol <= cols) {
+                    cell.classList.add('highlighted');
+                } else {
+                    cell.classList.remove('highlighted');
+                }
+            });
+            
+            document.getElementById('tableSizeDisplay').textContent = `${rows} × ${cols}`;
+        }
+        
+        function clearTableGridHighlight() {
+            document.querySelectorAll('.table-grid-cell').forEach(cell => {
+                cell.classList.remove('highlighted');
+            });
+            document.getElementById('tableSizeDisplay').textContent = '0 × 0';
+        }
+        
+        function createTable() {
+            if (selectedTableSize.rows === 0 || selectedTableSize.cols === 0) {
+                showToast('표 크기를 선택해주세요');
+                return;
+            }
+            
+            const editorContent = document.querySelector('.editor-content');
+            const table = document.createElement('table');
+            table.className = 'draggable-table';
+            table.id = `table-${++tableIdCounter}`;
+            
+            // Position table at center
+            const editorRect = editorContent.getBoundingClientRect();
+            table.style.left = '100px';
+            table.style.top = '100px';
+            
+            // Create table rows and cells
+            for (let i = 0; i < selectedTableSize.rows; i++) {
+                const row = table.insertRow();
+                for (let j = 0; j < selectedTableSize.cols; j++) {
+                    const cell = row.insertCell();
+                    cell.contentEditable = true;
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                }
+            }
+            
+            // Add cell selection functionality
+            setupTableCellSelection(table);
+            
+            // Add resize handles
+            const rightHandle = document.createElement('div');
+            rightHandle.className = 'table-resize-handle right';
+            table.appendChild(rightHandle);
+            
+            const bottomHandle = document.createElement('div');
+            bottomHandle.className = 'table-resize-handle bottom';
+            table.appendChild(bottomHandle);
+            
+            const cornerHandle = document.createElement('div');
+            cornerHandle.className = 'table-resize-handle corner';
+            table.appendChild(cornerHandle);
+            
+            // Add table controls
+            const controls = document.createElement('div');
+            controls.className = 'table-controls';
+            controls.innerHTML = `
+                <button class="table-control-btn" onclick="addTableRow(this)" title="행 추가">
+                    <i class="fas fa-plus"></i> 행
+                </button>
+                <button class="table-control-btn" onclick="addTableColumn(this)" title="열 추가">
+                    <i class="fas fa-plus"></i> 열
+                </button>
+                <button class="table-control-btn" onclick="openTableColorPicker(this)" title="셀 색상">
+                    <i class="fas fa-palette"></i>
+                </button>
+                <button class="table-control-btn" onclick="deleteTable(this)" title="표 삭제">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            table.appendChild(controls);
+            
+            // Make table draggable
+            makeTableDraggable(table);
+            
+            // Make table resizable
+            makeTableResizable(table);
+            
+            // Setup table cell selection
+            setupTableCellSelection(table);
+            
+            // Setup table spacing adjustment
+            setupTableSpacing(table);
+            
+            // Add to editor
+            editorContent.appendChild(table);
+            
+            // Select the table
+            selectTable(table);
+            
+            // Show toast with correct values before reset
+            showToast(`${selectedTableSize.rows}×${selectedTableSize.cols} 표가 삽입되었습니다`);
+            
+            // Reset selector
+            selectedTableSize = { rows: 0, cols: 0 };
+            clearTableGridHighlight();
+        }
+        
+        function makeTableDraggable(table) {
+            let isDragging = false;
+            let startX, startY, startLeft, startTop;
+            
+            // Remove existing drag handle if any
+            const existingHandle = table.querySelector('.table-drag-handle');
+            if (existingHandle) {
+                existingHandle.remove();
+            }
+            
+            // Create new drag handle for table
+            const dragHandle = document.createElement('div');
+            dragHandle.className = 'table-drag-handle';
+            dragHandle.style.cssText = `
+                position: absolute;
+                top: 2px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 40px;
+                height: 8px;
+                background: #666;
+                color: white;
+                text-align: center;
+                line-height: 8px;
+                font-size: 10px;
+                cursor: grab;
+                border-radius: 4px;
+                user-select: none;
+                opacity: 0;
+                transition: opacity 0.2s;
+                pointer-events: none;
+                z-index: 1000;
+            `;
+            dragHandle.innerHTML = '⋯';
+            table.appendChild(dragHandle);
+            
+            // Flag to track if mouse is over table or handle
+            let mouseOverTable = false;
+            let mouseOverHandle = false;
+            
+            function updateHandleVisibility() {
+                if (mouseOverTable || mouseOverHandle || isDragging) {
+                    dragHandle.style.opacity = '0.7';
+                    dragHandle.style.pointerEvents = 'auto';
+                } else {
+                    dragHandle.style.opacity = '0';
+                    dragHandle.style.pointerEvents = 'none';
+                }
+            }
+            
+            // Show/hide drag handle on hover
+            table.addEventListener('mouseenter', function() {
+                mouseOverTable = true;
+                updateHandleVisibility();
+            });
+            
+            table.addEventListener('mouseleave', function(e) {
+                mouseOverTable = false;
+                // Small delay to allow mouse to reach handle
+                setTimeout(() => {
+                    updateHandleVisibility();
+                }, 100);
+            });
+            
+            // Keep handle visible when hovering over it
+            dragHandle.addEventListener('mouseenter', function() {
+                mouseOverHandle = true;
+                this.style.opacity = '1';
+                updateHandleVisibility();
+            });
+            
+            dragHandle.addEventListener('mouseleave', function(e) {
+                mouseOverHandle = false;
+                // Small delay to allow mouse to reach table
+                setTimeout(() => {
+                    updateHandleVisibility();
+                }, 100);
+            });
+            
+            const handleMouseDown = function(e) {
+                // Only drag from the drag handle
+                if (!e.target.classList.contains('table-drag-handle')) {
+                    return;
+                }
+                
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startLeft = parseInt(table.style.left) || 0;
+                startTop = parseInt(table.style.top) || 0;
+                
+                dragHandle.style.cursor = 'grabbing';
+                selectTable(table);
+                e.preventDefault();
+                e.stopPropagation();
+            };
+            
+            const handleMouseMove = function(e) {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                table.style.left = (startLeft + deltaX) + 'px';
+                table.style.top = (startTop + deltaY) + 'px';
+            };
+            
+            const handleMouseUp = function() {
+                if (isDragging) {
+                    isDragging = false;
+                    dragHandle.style.cursor = 'grab';
+                    // Update visibility after drag ends
+                    updateHandleVisibility();
+                }
+            };
+            
+            // Add listeners only to drag handle
+            dragHandle.addEventListener('mousedown', handleMouseDown);
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        }
+        
+        function makeTableResizable(table) {
+            const handles = table.querySelectorAll('.table-resize-handle');
+            
+            handles.forEach(handle => {
+                let isResizing = false;
+                let startX, startY, startWidth, startHeight;
+                
+                handle.addEventListener('mousedown', function(e) {
+                    isResizing = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startWidth = table.offsetWidth;
+                    startHeight = table.offsetHeight;
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+                
+                document.addEventListener('mousemove', function(e) {
+                    if (!isResizing) return;
+                    
+                    if (handle.classList.contains('right')) {
+                        const width = startWidth + (e.clientX - startX);
+                        if (width > 100) {
+                            table.style.width = width + 'px';
+                        }
+                    } else if (handle.classList.contains('bottom')) {
+                        const height = startHeight + (e.clientY - startY);
+                        if (height > 50) {
+                            table.style.height = height + 'px';
+                        }
+                    } else if (handle.classList.contains('corner')) {
+                        const width = startWidth + (e.clientX - startX);
+                        const height = startHeight + (e.clientY - startY);
+                        if (width > 100) {
+                            table.style.width = width + 'px';
+                        }
+                        if (height > 50) {
+                            table.style.height = height + 'px';
+                        }
+                    }
+                });
+                
+                document.addEventListener('mouseup', function() {
+                    isResizing = false;
+                });
+            });
+        }
+        
+        function selectTable(table) {
+            // Deselect all tables
+            document.querySelectorAll('.draggable-table').forEach(t => {
+                t.classList.remove('selected');
+            });
+            
+            // Select this table
+            table.classList.add('selected');
+        }
+        
+        function selectTableCell(cell) {
+            // Remove previous selection
+            cell.closest('table').querySelectorAll('td').forEach(td => {
+                td.classList.remove('selected-cell');
+            });
+            
+            // Select this cell
+            cell.classList.add('selected-cell');
+        }
+        
+        function addTableRow(btn) {
+            const table = btn.closest('.draggable-table');
+            const row = table.insertRow();
+            const colCount = table.rows[0].cells.length;
+            
+            for (let i = 0; i < colCount; i++) {
+                const cell = row.insertCell();
+                cell.contentEditable = true;
+                cell.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectTableCell(this);
+                });
+            }
+            
+            showToast('행이 추가되었습니다');
+        }
+        
+        function addTableColumn(btn) {
+            const table = btn.closest('.draggable-table');
+            const rows = table.rows;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const cell = rows[i].insertCell();
+                cell.contentEditable = true;
+                cell.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectTableCell(this);
+                });
+            }
+            
+            showToast('열이 추가되었습니다');
+        }
+        
+        function deleteTable(btn) {
+            if (confirm('표를 삭제하시겠습니까?')) {
+                const table = btn.closest('.draggable-table');
+                table.remove();
+                showToast('표가 삭제되었습니다');
+            }
+        }
+        
+        function openTableColorPicker(btn) {
+            const table = btn.closest('.draggable-table');
+            const selectedCells = table.querySelectorAll('td.selected-cell');
+            
+            if (selectedCells.length === 0) {
+                showToast('색상을 변경할 셀을 선택해주세요');
+                return;
+            }
+            
+            // Create color picker dialog
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                background: white;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                max-width: 90%;
+                width: 300px;
+            `;
+            
+            dialog.innerHTML = `
+                <h3 style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;">셀 배경색</h3>
+                <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px;">
+                    <div class="color-option" style="width: 30px; height: 30px; background: #FFFFFF; border: 1px solid #ddd; cursor: pointer;" data-color="#FFFFFF"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #F8F9FA; cursor: pointer;" data-color="#F8F9FA"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #E9ECEF; cursor: pointer;" data-color="#E9ECEF"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #DEE2E6; cursor: pointer;" data-color="#DEE2E6"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #CED4DA; cursor: pointer;" data-color="#CED4DA"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #ADB5BD; cursor: pointer;" data-color="#ADB5BD"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #6C757D; cursor: pointer;" data-color="#6C757D"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #343A40; cursor: pointer;" data-color="#343A40"></div>
+                    
+                    <div class="color-option" style="width: 30px; height: 30px; background: #F8D7DA; cursor: pointer;" data-color="#F8D7DA"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #F5C2C7; cursor: pointer;" data-color="#F5C2C7"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #FFF3CD; cursor: pointer;" data-color="#FFF3CD"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #FFE69C; cursor: pointer;" data-color="#FFE69C"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #D1ECF1; cursor: pointer;" data-color="#D1ECF1"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #BEE5EB; cursor: pointer;" data-color="#BEE5EB"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #D4EDDA; cursor: pointer;" data-color="#D4EDDA"></div>
+                    <div class="color-option" style="width: 30px; height: 30px; background: #C3E6CB; cursor: pointer;" data-color="#C3E6CB"></div>
+                </div>
+                <button onclick="this.closest('div').parentElement.remove()" style="width: 100%; margin-top: 15px; padding: 8px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer;">닫기</button>
+            `;
+            
+            dialog.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const color = this.dataset.color;
+                    selectedCells.forEach(cell => {
+                        cell.style.backgroundColor = color;
+                    });
+                    overlay.remove();
+                    showToast('셀 색상이 변경되었습니다');
+                });
+            });
+            
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+        }
+        
+        // Setup table cell selection
+        function setupTableCellSelection(table) {
+            let isSelecting = false;
+            let startCell = null;
+            let endCell = null;
+            
+            table.addEventListener('mousedown', function(e) {
+                if (e.target.tagName === 'TD' && !e.target.closest('.table-drag-handle')) {
+                    isSelecting = true;
+                    table.isSelecting = true;
+                    startCell = e.target;
+                    endCell = e.target;
+                    
+                    // Clear previous selections
+                    table.querySelectorAll('td').forEach(td => {
+                        td.classList.remove('selected-cell');
+                    });
+                    
+                    e.target.classList.add('selected-cell');
+                    e.preventDefault();
+                }
+            });
+            
+            table.addEventListener('mousemove', function(e) {
+                if (isSelecting && e.target.tagName === 'TD') {
+                    endCell = e.target;
+                    updateCellSelection(table, startCell, endCell);
+                }
+            });
+            
+            table.addEventListener('mouseup', function() {
+                isSelecting = false;
+                table.isSelecting = false;
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isSelecting = false;
+                if (table) table.isSelecting = false;
+            });
+        }
+        
+        function updateCellSelection(table, startCell, endCell) {
+            const startRow = parseInt(startCell.dataset.row);
+            const startCol = parseInt(startCell.dataset.col);
+            const endRow = parseInt(endCell.dataset.row);
+            const endCol = parseInt(endCell.dataset.col);
+            
+            const minRow = Math.min(startRow, endRow);
+            const maxRow = Math.max(startRow, endRow);
+            const minCol = Math.min(startCol, endCol);
+            const maxCol = Math.max(startCol, endCol);
+            
+            // Clear all selections first
+            table.querySelectorAll('td').forEach(td => {
+                td.classList.remove('selected-cell');
+            });
+            
+            // Select cells in range
+            for (let row = minRow; row <= maxRow; row++) {
+                for (let col = minCol; col <= maxCol; col++) {
+                    const cell = table.querySelector(`td[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) {
+                        cell.classList.add('selected-cell');
+                    }
+                }
+            }
+        }
+        
+        // Setup table spacing adjustment
+        function setupTableSpacing(table) {
+            const spacingHandles = document.createElement('div');
+            spacingHandles.className = 'table-spacing-handles';
+            spacingHandles.style.cssText = `
+                position: absolute;
+                top: -5px;
+                left: -5px;
+                right: -5px;
+                bottom: -5px;
+                pointer-events: none;
+            `;
+            
+            // Create spacing adjustment handles for each side
+            const positions = ['top', 'right', 'bottom', 'left'];
+            positions.forEach(position => {
+                const handle = document.createElement('div');
+                handle.className = `spacing-handle spacing-${position}`;
+                handle.style.cssText = `
+                    position: absolute;
+                    background: transparent;
+                    pointer-events: auto;
+                    ${position === 'top' || position === 'bottom' ? `
+                        left: 20%;
+                        right: 20%;
+                        height: 10px;
+                        cursor: ns-resize;
+                        ${position}: -5px;
+                    ` : `
+                        top: 20%;
+                        bottom: 20%;
+                        width: 10px;
+                        cursor: ew-resize;
+                        ${position}: -5px;
+                    `}
+                `;
+                
+                // Add visual indicator on hover
+                handle.addEventListener('mouseenter', function() {
+                    this.style.background = 'rgba(0, 123, 255, 0.3)';
+                });
+                
+                handle.addEventListener('mouseleave', function() {
+                    this.style.background = 'transparent';
+                });
+                
+                // Handle spacing adjustment
+                let isAdjusting = false;
+                let startPos = 0;
+                let startMargin = 0;
+                
+                handle.addEventListener('mousedown', function(e) {
+                    isAdjusting = true;
+                    startPos = position === 'top' || position === 'bottom' ? e.clientY : e.clientX;
+                    
+                    // Get current margin
+                    const computedStyle = window.getComputedStyle(table);
+                    startMargin = parseInt(computedStyle[`margin${position.charAt(0).toUpperCase() + position.slice(1)}`]) || 0;
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+                
+                document.addEventListener('mousemove', function(e) {
+                    if (!isAdjusting) return;
+                    
+                    let delta;
+                    if (position === 'top' || position === 'bottom') {
+                        delta = e.clientY - startPos;
+                        if (position === 'top') delta = -delta;
+                    } else {
+                        delta = e.clientX - startPos;
+                        if (position === 'left') delta = -delta;
+                    }
+                    
+                    const newMargin = Math.max(0, startMargin + delta);
+                    table.style[`margin${position.charAt(0).toUpperCase() + position.slice(1)}`] = newMargin + 'px';
+                });
+                
+                document.addEventListener('mouseup', function() {
+                    isAdjusting = false;
+                });
+                
+                spacingHandles.appendChild(handle);
+            });
+            
+            table.appendChild(spacingHandles);
+            
+            // Show/hide spacing handles based on selection
+            table.addEventListener('mouseenter', function() {
+                if (this.classList.contains('selected')) {
+                    spacingHandles.style.display = 'block';
+                }
+            });
+            
+            table.addEventListener('mouseleave', function() {
+                spacingHandles.style.display = 'none';
+            });
+            
+            // Initially hide spacing handles
+            spacingHandles.style.display = 'none';
+        }
+        
+        // Open background color picker
+        function openBgColorPicker() {
+            let selectedColor = document.getElementById('bgColorCode')?.value || '#FFFFFF';
+            const savedRange = saveCurrentSelection();
+            
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            // Create dialog
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                background: white;
+                padding: 12px;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                max-width: 90%;
+                width: 320px;
+                max-height: 80vh;
+                overflow-y: auto;
+            `;
+            
+            // Title with preview
+            const titleContainer = document.createElement('div');
+            titleContainer.style.cssText = `
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 12px;
+            `;
+            
+            const title = document.createElement('h3');
+            title.textContent = '배경 색상 선택';
+            title.style.cssText = `
+                margin: 0;
+                font-size: 16px;
+                font-weight: bold;
+                color: #333;
+            `;
+            
+            const preview = document.createElement('div');
+            preview.id = 'bgColorPreview';
+            preview.style.cssText = `
+                width: 24px;
+                height: 24px;
+                background: ${selectedColor};
+                border-radius: 4px;
+                border: 1px solid #ddd;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            `;
+            
+            titleContainer.appendChild(title);
+            titleContainer.appendChild(preview);
+            dialog.appendChild(titleContainer);
+            
+            // Color grid
+            const colorGrid = document.createElement('div');
+            colorGrid.style.cssText = `
+                display: grid;
+                grid-template-columns: repeat(8, 1fr);
+                gap: 6px;
+                margin-bottom: 12px;
+            `;
+            
+            // Background colors
+            const bgColors = [
+                // Basic colors
+                { color: '#FFFFFF', name: '흰색' },
+                { color: '#F8F9FA', name: '연한 회색' },
+                { color: '#E9ECEF', name: '회색' },
+                { color: '#DEE2E6', name: '진한 회색' },
+                { color: '#FFE5E5', name: '연분홍' },
+                { color: '#FFE5CC', name: '연살구' },
+                { color: '#FFFFCC', name: '연노랑' },
+                { color: '#E5FFE5', name: '연초록' },
+                
+                { color: '#E5F3FF', name: '연하늘' },
+                { color: '#E5E5FF', name: '연보라' },
+                { color: '#FFE5F9', name: '연자주' },
+                { color: '#F0F0F0', name: '밝은 회색' },
+                { color: '#FFCCCC', name: '분홍' },
+                { color: '#FFD9B3', name: '살구' },
+                { color: '#FFFF99', name: '노랑' },
+                { color: '#CCFFCC', name: '초록' },
+                
+                { color: '#CCE5FF', name: '하늘' },
+                { color: '#CCCCFF', name: '보라' },
+                { color: '#FFCCF2', name: '자주' },
+                { color: '#D0D0D0', name: '중간 회색' },
+                { color: '#FF9999', name: '진분홍' },
+                { color: '#FFB366', name: '진살구' },
+                { color: '#FFFF66', name: '진노랑' },
+                { color: '#99FF99', name: '진초록' },
+                
+                { color: '#99CCFF', name: '진하늘' },
+                { color: '#9999FF', name: '진보라' },
+                { color: '#FF99E5', name: '진자주' },
+                { color: '#A0A0A0', name: '어두운 회색' },
+                { color: '#FF6666', name: '빨강' },
+                { color: '#FF9933', name: '주황' },
+                { color: '#FFFF33', name: '밝은 노랑' },
+                { color: '#66FF66', name: '밝은 초록' }
+            ];
+            
+            bgColors.forEach(colorInfo => {
+                const block = document.createElement('div');
+                const color = colorInfo.color;
+                
+                // 3D LEGO block effect
+                block.style.cssText = `
+                    width: 100%;
+                    aspect-ratio: 1;
+                    background: ${color};
+                    border-radius: 4px;
+                    cursor: pointer;
+                    position: relative;
+                    transition: all 0.2s;
+                    box-shadow: 
+                        0 1px 0 0 ${adjustColor(color, -30)},
+                        0 2px 0 0 ${adjustColor(color, -50)},
+                        0 2px 4px rgba(0,0,0,0.2);
+                    transform: translateY(0);
+                    border: ${color === '#FFFFFF' ? '1px solid #e0e0e0' : 'none'};
+                `;
+                
+                // Hover effect
+                block.addEventListener('mouseenter', () => {
+                    block.style.transform = 'translateY(-1px)';
+                    block.style.boxShadow = `
+                        0 2px 0 0 ${adjustColor(color, -30)},
+                        0 3px 0 0 ${adjustColor(color, -50)},
+                        0 3px 6px rgba(0,0,0,0.3)
+                    `;
+                });
+                
+                block.addEventListener('mouseleave', () => {
+                    block.style.transform = 'translateY(0)';
+                    block.style.boxShadow = `
+                        0 1px 0 0 ${adjustColor(color, -30)},
+                        0 2px 0 0 ${adjustColor(color, -50)},
+                        0 2px 4px rgba(0,0,0,0.2)
+                    `;
+                });
+                
+                // Click event
+                block.addEventListener('click', () => {
+                    selectedColor = color;
+                    const preview = document.getElementById('bgColorPreview');
+                    if (preview) {
+                        preview.style.background = color;
+                    }
+                    
+                    colorInput.value = color.toUpperCase();
+                    
+                    colorGrid.querySelectorAll('div').forEach(b => {
+                        b.style.outline = 'none';
+                    });
+                    block.style.outline = '2px solid #007AFF';
+                    block.style.outlineOffset = '2px';
+                });
+                
+                block.title = colorInfo.name;
+                colorGrid.appendChild(block);
+            });
+            
+            dialog.appendChild(colorGrid);
+            
+            // Color code input
+            const inputContainer = document.createElement('div');
+            inputContainer.style.cssText = `
+                margin-bottom: 12px;
+            `;
+            
+            const colorInput = document.createElement('input');
+            colorInput.type = 'text';
+            colorInput.value = selectedColor;
+            colorInput.placeholder = '#FFFFFF';
+            colorInput.style.cssText = `
+                width: 100%;
+                padding: 6px 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 13px;
+                font-family: monospace;
+                box-sizing: border-box;
+            `;
+            
+            colorInput.addEventListener('input', () => {
+                const color = colorInput.value;
+                if (/^#[0-9A-F]{6}$/i.test(color)) {
+                    selectedColor = color;
+                    const preview = document.getElementById('bgColorPreview');
+                    if (preview) {
+                        preview.style.background = color;
+                    }
+                    
+                    colorGrid.querySelectorAll('div').forEach(b => {
+                        b.style.outline = 'none';
+                    });
+                }
+            });
+            
+            inputContainer.appendChild(colorInput);
+            dialog.appendChild(inputContainer);
+            
+            // Button container
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = `
+                display: flex;
+                gap: 8px;
+                margin-top: 8px;
+            `;
+            
+            // Save button
+            const saveButton = document.createElement('button');
+            saveButton.textContent = '저장';
+            saveButton.style.cssText = `
+                flex: 1;
+                padding: 8px;
+                background: #007AFF;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: bold;
+            `;
+            saveButton.addEventListener('click', () => {
+                // Apply to selected table cells
+                const selectedCells = document.querySelectorAll('.draggable-table td.selected-cell');
+                if (selectedCells.length > 0) {
+                    selectedCells.forEach(cell => {
+                        cell.style.backgroundColor = selectedColor;
+                    });
+                    showToast('표 셀 배경색이 적용되었습니다');
+                } else if (savedRange) {
+                    // Apply to text selection
+                    restoreSelection(savedRange);
+                    applyFormat('backgroundColor', selectedColor);
+                    showToast('텍스트 배경색이 적용되었습니다');
+                }
+                
+                // Update button and input
+                const bgColorButton = document.getElementById('bgColorButton');
+                if (bgColorButton) {
+                    bgColorButton.style.background = selectedColor;
+                    bgColorButton.style.boxShadow = `
+                        0 1px 0 0 ${adjustColor(selectedColor, -30)},
+                        0 2px 0 0 ${adjustColor(selectedColor, -50)},
+                        0 2px 4px rgba(0,0,0,0.2)
+                    `;
+                }
+                const bgColorCode = document.getElementById('bgColorCode');
+                if (bgColorCode) {
+                    bgColorCode.value = selectedColor.toUpperCase();
+                }
+                
+                document.body.removeChild(overlay);
+            });
+            buttonContainer.appendChild(saveButton);
+            
+            // Close button
+            const closeButton = document.createElement('button');
+            closeButton.textContent = '닫기';
+            closeButton.style.cssText = `
+                flex: 1;
+                padding: 8px;
+                background: #f0f0f0;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: bold;
+            `;
+            closeButton.addEventListener('click', () => {
+                document.body.removeChild(overlay);
+            });
+            buttonContainer.appendChild(closeButton);
+            
+            dialog.appendChild(buttonContainer);
+            
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    document.body.removeChild(overlay);
+                }
+            });
+            
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+            
+            colorInput.focus();
+        }
+        
+        // Save and restore selection
+        function saveCurrentSelection() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                return selection.getRangeAt(0).cloneRange();
+            }
+            return null;
+        }
+        
+        function restoreSelection(range) {
+            if (range) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+        
+        // Update color from code
+        function updateColorFromCode(type, code) {
+            if (/^#[0-9A-F]{6}$/i.test(code)) {
+                if (type === 'bg') {
+                    const bgColorButton = document.getElementById('bgColorButton');
+                    if (bgColorButton) {
+                        bgColorButton.style.background = code;
+                        bgColorButton.style.boxShadow = `
+                            0 1px 0 0 ${adjustColor(code, -30)},
+                            0 2px 0 0 ${adjustColor(code, -50)},
+                            0 2px 4px rgba(0,0,0,0.2)
+                        `;
+                    }
+                    document.getElementById('bgColor').value = code;
+                }
+            }
+        }
     </script>
 </body>
 </html>
