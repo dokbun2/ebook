@@ -1321,6 +1321,13 @@
             background: #e3f2fd;
         }
         
+        .draggable-table td.editing {
+            outline: 2px solid #007AFF;
+            outline-offset: -2px;
+            background: white;
+            z-index: 10;
+        }
+        
         /* Table Resize Handles */
         .table-resize-handle {
             position: absolute;
@@ -5637,6 +5644,34 @@
                     cell.contentEditable = true;
                     cell.dataset.row = i;
                     cell.dataset.col = j;
+                    
+                    // 셀 더블클릭시 편집 가능하도록
+                    cell.addEventListener('dblclick', function(e) {
+                        e.stopPropagation();
+                        this.contentEditable = true;
+                        this.focus();
+                        this.classList.add('editing');
+                        
+                        // 텍스트 전체 선택
+                        const range = document.createRange();
+                        range.selectNodeContents(this);
+                        const sel = window.getSelection();
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    });
+                    
+                    // 셀에서 포커스 나갈 때
+                    cell.addEventListener('blur', function() {
+                        this.classList.remove('editing');
+                    });
+                    
+                    // 엔터키로 편집 종료
+                    cell.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.blur();
+                        }
+                    });
                 }
             }
             
@@ -5663,8 +5698,14 @@
                 <button class="table-control-btn" onclick="addTableRow(this)" title="행 추가">
                     <i class="fas fa-plus"></i> 행
                 </button>
+                <button class="table-control-btn" onclick="removeTableRow(this)" title="행 제거">
+                    <i class="fas fa-minus"></i> 행
+                </button>
                 <button class="table-control-btn" onclick="addTableColumn(this)" title="열 추가">
                     <i class="fas fa-plus"></i> 열
+                </button>
+                <button class="table-control-btn" onclick="removeTableColumn(this)" title="열 제거">
+                    <i class="fas fa-minus"></i> 열
                 </button>
                 <button class="table-control-btn" onclick="openTableColorPicker(this)" title="셀 색상">
                     <i class="fas fa-palette"></i>
@@ -5900,9 +5941,28 @@
             for (let i = 0; i < colCount; i++) {
                 const cell = row.insertCell();
                 cell.contentEditable = true;
-                cell.addEventListener('click', function(e) {
+                cell.addEventListener('dblclick', function(e) {
                     e.stopPropagation();
-                    selectTableCell(this);
+                    this.contentEditable = true;
+                    this.focus();
+                    this.classList.add('editing');
+                    
+                    const range = document.createRange();
+                    range.selectNodeContents(this);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                });
+                
+                cell.addEventListener('blur', function() {
+                    this.classList.remove('editing');
+                });
+                
+                cell.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.blur();
+                    }
                 });
             }
             
@@ -5923,6 +5983,72 @@
             }
             
             showToast('열이 추가되었습니다');
+        }
+        
+        function removeTableRow(btn) {
+            const table = btn.closest('.draggable-table');
+            if (table.rows.length <= 1) {
+                showToast('마지막 행은 삭제할 수 없습니다');
+                return;
+            }
+            
+            // 선택된 행 찾기
+            const selectedCells = table.querySelectorAll('td.selected-cell');
+            let rowsToRemove = new Set();
+            
+            selectedCells.forEach(cell => {
+                rowsToRemove.add(cell.parentNode);
+            });
+            
+            if (rowsToRemove.size === 0) {
+                // 선택된 셀이 없으면 마지막 행 삭제
+                table.deleteRow(table.rows.length - 1);
+            } else {
+                // 선택된 행들 삭제
+                Array.from(rowsToRemove).forEach(row => {
+                    row.remove();
+                });
+            }
+            
+            showToast('행이 제거되었습니다');
+        }
+        
+        function removeTableColumn(btn) {
+            const table = btn.closest('.draggable-table');
+            const rows = table.rows;
+            
+            if (rows[0].cells.length <= 1) {
+                showToast('마지막 열은 삭제할 수 없습니다');
+                return;
+            }
+            
+            // 선택된 열 찾기
+            const selectedCells = table.querySelectorAll('td.selected-cell');
+            let colsToRemove = new Set();
+            
+            selectedCells.forEach(cell => {
+                colsToRemove.add(cell.cellIndex);
+            });
+            
+            if (colsToRemove.size === 0) {
+                // 선택된 셀이 없으면 마지막 열 삭제
+                const lastColIndex = rows[0].cells.length - 1;
+                for (let i = 0; i < rows.length; i++) {
+                    rows[i].deleteCell(lastColIndex);
+                }
+            } else {
+                // 선택된 열들 삭제 (큰 인덱스부터 삭제)
+                const sortedCols = Array.from(colsToRemove).sort((a, b) => b - a);
+                sortedCols.forEach(colIndex => {
+                    for (let i = 0; i < rows.length; i++) {
+                        if (rows[i].cells[colIndex]) {
+                            rows[i].deleteCell(colIndex);
+                        }
+                    }
+                });
+            }
+            
+            showToast('열이 제거되었습니다');
         }
         
         function deleteTable(btn) {
