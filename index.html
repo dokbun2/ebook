@@ -2428,6 +2428,58 @@
             showToast('PDF가 다운로드되었습니다');
         }
 
+        // Update color code display when color picker changes
+        function updateColorCode(type, color) {
+            const codeInput = document.getElementById(type + 'ColorCode');
+            if (codeInput) {
+                codeInput.value = color.toUpperCase();
+            }
+            const valueDisplay = document.getElementById(type + 'ColorValue');
+            if (valueDisplay) {
+                valueDisplay.textContent = color.toUpperCase();
+            }
+        }
+
+        // Update color picker when code is entered
+        function updateColorFromCode(type, code) {
+            // Validate color code
+            const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+            
+            // Add # if missing
+            if (!code.startsWith('#')) {
+                code = '#' + code;
+            }
+            
+            if (colorRegex.test(code)) {
+                // Convert 3-digit to 6-digit if needed
+                if (code.length === 4) {
+                    code = '#' + code[1] + code[1] + code[2] + code[2] + code[3] + code[3];
+                }
+                
+                // Update color picker
+                const colorPicker = document.getElementById(type + 'Color');
+                if (colorPicker) {
+                    colorPicker.value = code;
+                    
+                    // Apply the color
+                    if (type === 'text') {
+                        applyFormat('color', code);
+                    }
+                }
+                
+                // Update display
+                updateColorCode(type, code);
+            } else {
+                // Invalid color code - revert to current color
+                const colorPicker = document.getElementById(type + 'Color');
+                if (colorPicker) {
+                    const codeInput = document.getElementById(type + 'ColorCode');
+                    codeInput.value = colorPicker.value.toUpperCase();
+                }
+                showToast('올바른 색상 코드를 입력하세요 (예: #FF0000)');
+            }
+        }
+
         // Show toast
         function showToast(message) {
             const toast = document.createElement('div');
@@ -2801,36 +2853,106 @@
         // Change shape color
         function changeShapeColor(btn) {
             const shape = btn.closest('.shape-element');
-            const colorInput = document.createElement('input');
-            colorInput.type = 'color';
-            colorInput.value = '#6c757d';
-            colorInput.style.position = 'fixed';
-            colorInput.style.top = '-100px';
-            colorInput.style.left = '-100px';
             
-            document.body.appendChild(colorInput);
+            // Create a color picker dialog
+            const colorDialog = document.createElement('div');
+            colorDialog.className = 'color-dialog';
+            colorDialog.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--bg-primary);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                z-index: 10000;
+            `;
             
-            colorInput.addEventListener('change', function() {
+            const currentColor = shape.dataset.currentColor || '#6c757d';
+            
+            colorDialog.innerHTML = `
+                <h4 style="margin: 0 0 15px 0; font-size: 16px; color: var(--text-primary);">도형 색상 선택</h4>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="color" id="shapeColorPicker" value="${currentColor}" 
+                           style="width: 40px; height: 40px; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">
+                    <input type="text" id="shapeColorCode" value="${currentColor.toUpperCase()}" 
+                           placeholder="#000000"
+                           style="width: 100px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; 
+                                  background: var(--bg-secondary); color: var(--text-primary); font-family: monospace;">
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="this.closest('.color-dialog').remove()" 
+                            style="padding: 6px 16px; background: var(--bg-secondary); color: var(--text-primary); 
+                                   border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">
+                        취소
+                    </button>
+                    <button id="applyShapeColor"
+                            style="padding: 6px 16px; background: var(--primary); color: white; 
+                                   border: none; border-radius: 4px; cursor: pointer;">
+                        적용
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(colorDialog);
+            
+            const picker = document.getElementById('shapeColorPicker');
+            const codeInput = document.getElementById('shapeColorCode');
+            const applyBtn = document.getElementById('applyShapeColor');
+            
+            // Update code when picker changes
+            picker.addEventListener('input', function() {
+                codeInput.value = this.value.toUpperCase();
+            });
+            
+            // Update picker when code changes
+            codeInput.addEventListener('change', function() {
+                const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+                let code = this.value;
+                
+                if (!code.startsWith('#')) {
+                    code = '#' + code;
+                }
+                
+                if (colorRegex.test(code)) {
+                    if (code.length === 4) {
+                        code = '#' + code[1] + code[1] + code[2] + code[2] + code[3] + code[3];
+                    }
+                    picker.value = code;
+                    this.value = code.toUpperCase();
+                } else {
+                    this.value = picker.value.toUpperCase();
+                    showToast('올바른 색상 코드를 입력하세요 (예: #FF0000)');
+                }
+            });
+            
+            // Apply color
+            applyBtn.addEventListener('click', function() {
+                const selectedColor = picker.value;
                 const svg = shape.querySelector('svg');
+                const icon = shape.querySelector('i');
+                
                 if (svg) {
                     svg.querySelectorAll('*').forEach(el => {
                         if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none' && el.getAttribute('fill') !== 'currentColor') {
-                            el.setAttribute('fill', this.value);
+                            el.setAttribute('fill', selectedColor);
                         }
                         if (el.hasAttribute('stroke') && el.getAttribute('stroke') !== 'none' && el.getAttribute('stroke') !== 'currentColor') {
-                            el.setAttribute('stroke', this.value);
+                            el.setAttribute('stroke', selectedColor);
                         }
                     });
                 } else {
                     // For icons
                     const icon = shape.querySelector('i');
                     if (icon) {
-                        icon.style.color = this.value;
+                        icon.style.color = selectedColor;
                     }
                 }
                 
                 // 색상 정보 저장
-                shape.dataset.currentColor = this.value;
+                shape.dataset.currentColor = selectedColor;
                 
                 // 현재 fill/stroke 모드 확인 후 적용
                 const fillMode = shape.dataset.fillMode || 'fill';
@@ -2839,20 +2961,19 @@
                     if (svg) {
                         svg.querySelectorAll('*').forEach(el => {
                             if (el.hasAttribute('stroke')) {
-                                el.setAttribute('stroke', this.value);
+                                el.setAttribute('stroke', selectedColor);
                             }
                         });
                     } else if (icon) {
-                        icon.style.webkitTextStroke = '2px ' + this.value;
+                        icon.style.webkitTextStroke = '2px ' + selectedColor;
                     }
                 }
                 
                 showToast('도형 색상이 변경되었습니다');
-                document.body.removeChild(colorInput);
+                colorDialog.remove();
             });
-            
-            colorInput.click();
         }
+
         
         // Toggle shape fill/stroke
         function toggleShapeFill(btn) {
