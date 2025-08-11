@@ -507,13 +507,14 @@
 
         .color-picker-wrapper {
             position: relative;
-            width: 32px;
-            height: 32px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         .color-picker {
-            width: 100%;
-            height: 100%;
+            width: 32px;
+            height: 32px;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
             cursor: pointer;
@@ -521,6 +522,29 @@
             -moz-appearance: none;
             appearance: none;
             background: transparent;
+        }
+
+        .color-code-input {
+            width: 90px;
+            height: 32px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: 'Paperlogy', monospace;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .color-code-input:hover {
+            border-color: var(--primary);
+        }
+
+        .color-code-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
         }
 
         .color-picker::-webkit-color-swatch-wrapper {
@@ -1251,7 +1275,10 @@
                             <div class="color-group">
                                 <div class="color-picker-wrapper">
                                     <input type="color" class="color-picker" id="textColor" value="#212529" 
-                                           onchange="applyFormat('color', this.value)">
+                                           onchange="applyFormat('color', this.value); updateColorCode('text', this.value)">
+                                    <input type="text" class="color-code-input" id="textColorCode" value="#212529" 
+                                           placeholder="#000000"
+                                           onchange="updateColorFromCode('text', this.value)">
                                 </div>
                                 <span class="form-label" id="textColorValue">#212529</span>
                             </div>
