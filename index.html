@@ -1310,7 +1310,14 @@
             min-height: 30px;
             position: relative;
             background: white;
-            cursor: text;
+            cursor: cell;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+        }
+        
+        .draggable-table.selecting td {
+            cursor: crosshair;
         }
         
         .draggable-table td:hover {
@@ -1318,7 +1325,17 @@
         }
         
         .draggable-table td.selected-cell {
-            background: #e3f2fd;
+            background: #e3f2fd !important;
+            border-color: #2196F3;
+        }
+        
+        .draggable-table td.selecting {
+            background: #f5f5f5;
+        }
+        
+        .draggable-table td.selection-preview {
+            background: #e8f4fd;
+            transition: background-color 0.1s ease;
         }
         
         .draggable-table td.editing {
@@ -5648,9 +5665,13 @@
                     // 셀 더블클릭시 편집 가능하도록
                     cell.addEventListener('dblclick', function(e) {
                         e.stopPropagation();
+                        e.preventDefault();
+                        
+                        // 편집 모드로 전환
                         this.contentEditable = true;
                         this.focus();
                         this.classList.add('editing');
+                        this.style.cursor = 'text';
                         
                         // 텍스트 전체 선택
                         const range = document.createRange();
@@ -5663,6 +5684,7 @@
                     // 셀에서 포커스 나갈 때
                     cell.addEventListener('blur', function() {
                         this.classList.remove('editing');
+                        this.style.cursor = 'cell';
                     });
                     
                     // 엔터키로 편집 종료
@@ -6138,42 +6160,84 @@
             let startCell = null;
             let endCell = null;
             
-            table.addEventListener('mousedown', function(e) {
-                if (e.target.tagName === 'TD' && !e.target.closest('.table-drag-handle')) {
-                    isSelecting = true;
-                    table.isSelecting = true;
-                    startCell = e.target;
-                    endCell = e.target;
-                    
-                    // Clear previous selections
-                    table.querySelectorAll('td').forEach(td => {
-                        td.classList.remove('selected-cell');
-                    });
-                    
-                    e.target.classList.add('selected-cell');
+            // Prevent text selection during drag
+            table.addEventListener('selectstart', function(e) {
+                if (isSelecting) {
                     e.preventDefault();
                 }
             });
             
+            table.addEventListener('mousedown', function(e) {
+                if (e.target.tagName === 'TD' && !e.target.closest('.table-drag-handle') && !e.target.closest('.table-controls')) {
+                    const clickedCell = e.target;
+                    
+                    // Skip if cell is in editing mode
+                    if (clickedCell.classList.contains('editing')) {
+                        return;
+                    }
+                    
+                    // Shift + Click for range selection
+                    if (e.shiftKey && startCell) {
+                        endCell = clickedCell;
+                        updateCellSelection(table, startCell, endCell);
+                    } else {
+                        // Normal click or start of drag
+                        isSelecting = true;
+                        table.classList.add('selecting');
+                        startCell = clickedCell;
+                        endCell = clickedCell;
+                        
+                        // Clear previous selections if not holding Ctrl/Cmd
+                        if (!e.ctrlKey && !e.metaKey) {
+                            table.querySelectorAll('td').forEach(td => {
+                                td.classList.remove('selected-cell');
+                            });
+                        }
+                        
+                        clickedCell.classList.add('selected-cell');
+                    }
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+            
             table.addEventListener('mousemove', function(e) {
-                if (isSelecting && e.target.tagName === 'TD') {
-                    endCell = e.target;
-                    updateCellSelection(table, startCell, endCell);
+                if (isSelecting) {
+                    const td = e.target.closest('td');
+                    if (td && td.parentElement.parentElement === table) {
+                        endCell = td;
+                        updateCellSelection(table, startCell, endCell);
+                    }
                 }
             });
             
             table.addEventListener('mouseup', function() {
-                isSelecting = false;
-                table.isSelecting = false;
+                if (isSelecting) {
+                    isSelecting = false;
+                    table.classList.remove('selecting');
+                }
             });
             
+            // Global mouseup to handle when mouse is released outside table
             document.addEventListener('mouseup', function() {
-                isSelecting = false;
-                if (table) table.isSelecting = false;
+                if (isSelecting) {
+                    isSelecting = false;
+                    table.classList.remove('selecting');
+                }
+            });
+            
+            // Prevent context menu during selection
+            table.addEventListener('contextmenu', function(e) {
+                if (e.target.tagName === 'TD') {
+                    e.preventDefault();
+                }
             });
         }
         
         function updateCellSelection(table, startCell, endCell) {
+            if (!startCell || !endCell) return;
+            
             const startRow = parseInt(startCell.dataset.row);
             const startCol = parseInt(startCell.dataset.col);
             const endRow = parseInt(endCell.dataset.row);
@@ -6184,9 +6248,9 @@
             const minCol = Math.min(startCol, endCol);
             const maxCol = Math.max(startCol, endCol);
             
-            // Clear all selections first
+            // Clear all selections and previews first
             table.querySelectorAll('td').forEach(td => {
-                td.classList.remove('selected-cell');
+                td.classList.remove('selected-cell', 'selection-preview');
             });
             
             // Select cells in range
@@ -6198,6 +6262,47 @@
                     }
                 }
             }
+            
+            // Show selection info
+            const selectedCount = (maxRow - minRow + 1) * (maxCol - minCol + 1);
+            if (selectedCount > 1) {
+                showSelectionInfo(`${selectedCount}개 셀 선택됨`);
+            }
+        }
+        
+        // Show selection info tooltip
+        function showSelectionInfo(text) {
+            let tooltip = document.getElementById('selection-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'selection-tooltip';
+                tooltip.style.cssText = `
+                    position: fixed;
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    pointer-events: none;
+                    z-index: 10000;
+                    display: none;
+                `;
+                document.body.appendChild(tooltip);
+            }
+            
+            tooltip.textContent = text;
+            tooltip.style.display = 'block';
+            
+            // Position tooltip near mouse
+            document.addEventListener('mousemove', function updateTooltipPosition(e) {
+                tooltip.style.left = e.clientX + 10 + 'px';
+                tooltip.style.top = e.clientY + 10 + 'px';
+            });
+            
+            // Hide after selection ends
+            setTimeout(() => {
+                tooltip.style.display = 'none';
+            }, 2000);
         }
         
         // Setup table spacing adjustment
