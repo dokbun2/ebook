@@ -178,6 +178,15 @@
             height: 100vh;
             padding-top: 70px;
         }
+        
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar-open .main-content {
+            margin-left: 320px;
+        }
 
         /* Sidebar */
         .sidebar {
@@ -185,7 +194,18 @@
             background: var(--bg-secondary);
             border-right: 1px solid rgba(255,255,255,0.05);
             overflow-y: auto;
-            transition: var(--transition);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            left: 0;
+            top: 70px;
+            bottom: 0;
+            transform: translateX(-100%);
+            z-index: 999;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .sidebar.open {
+            transform: translateX(0);
         }
 
         .sidebar-section {
@@ -389,6 +409,7 @@
             overflow-y: auto;
             padding: 32px;
             position: relative;
+            width: 100%;
         }
 
         .editor-toolbar {
@@ -704,16 +725,8 @@
 
         /* Mobile Responsive */
         @media (max-width: 1024px) {
-            .sidebar {
-                position: absolute;
-                left: -320px;
-                height: 100%;
-                z-index: 999;
-                box-shadow: var(--shadow-lg);
-            }
-
-            .sidebar.open {
-                left: 0;
+            .sidebar-open .main-content {
+                margin-left: 0;
             }
 
             .editor-container {
@@ -953,7 +966,7 @@
             </section>
         </aside>
 
-        <main class="editor-container">
+        <main class="editor-container main-content">
             <div class="editor-toolbar">
                 <div class="toolbar-actions">
                     <button class="btn" onclick="insertHeading(1)">
@@ -1091,11 +1104,15 @@
         // Toggle sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const appContainer = document.querySelector('.app-container');
             sidebarOpen = !sidebarOpen;
+            
             if (sidebarOpen) {
                 sidebar.classList.add('open');
+                appContainer.classList.add('sidebar-open');
             } else {
                 sidebar.classList.remove('open');
+                appContainer.classList.remove('sidebar-open');
             }
         }
 

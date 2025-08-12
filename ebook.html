@@ -157,6 +157,7 @@
             overflow-y: auto;
             padding: 20px;
             position: relative;
+            width: 100%;
         }
 
         .page {
@@ -479,11 +480,27 @@
 
         let pageCounter = 1;
         let selectedImage = null;
+        let sidebarOpen = false;
 
         // 문서 초기화
         function initDocument() {
             updatePageNumbers();
             updateFontSizeDisplay();
+        }
+
+        // 사이드바 토글
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const container = document.querySelector('.container');
+            sidebarOpen = !sidebarOpen;
+            
+            if (sidebarOpen) {
+                sidebar.classList.add('open');
+                container.classList.add('sidebar-open');
+            } else {
+                sidebar.classList.remove('open');
+                container.classList.remove('sidebar-open');
+            }
         }
 
         // 새 문서 만들기
