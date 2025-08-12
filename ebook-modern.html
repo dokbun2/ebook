@@ -1526,6 +1526,11 @@
         // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
             initDocument();
+            // 사이드바가 초기에 닫혀있도록 확인
+            const sidebar = document.getElementById('sidebar');
+            const appContainer = document.querySelector('.app-container');
+            sidebar.classList.remove('open');
+            appContainer.classList.remove('sidebar-open');
         });
     </script>
 </body>
