@@ -1384,6 +1384,79 @@
         .draggable-table td.selected-cell {
             background: #e3f2fd !important;
             border-color: #2196F3;
+            position: relative;
+        }
+        
+        .draggable-table td.multi-selected {
+            background: #bbdefb !important;
+            border-color: #1976D2;
+        }
+        
+        /* Select All Button */
+        .table-select-all {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 16px;
+            height: 16px;
+            background: #007AFF;
+            border: 2px solid white;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10;
+            display: none;
+        }
+        
+        .draggable-table.selected .table-select-all {
+            display: block;
+        }
+        
+        .table-select-all:hover {
+            background: #0051D5;
+            transform: scale(1.1);
+        }
+        
+        /* Context Menu */
+        .table-context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            z-index: 10000;
+            display: none;
+            min-width: 200px;
+        }
+        
+        .table-context-menu.show {
+            display: block;
+        }
+        
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+        
+        .context-menu-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .context-menu-item i {
+            width: 16px;
+            color: #666;
+        }
+        
+        .context-menu-separator {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 4px 0;
         }
         
         .draggable-table td.selecting {
@@ -6147,6 +6220,16 @@
             cornerHandle.className = 'table-resize-handle corner';
             table.appendChild(cornerHandle);
             
+            // Add select all button
+            const selectAllBtn = document.createElement('div');
+            selectAllBtn.className = 'table-select-all';
+            selectAllBtn.title = '전체 선택';
+            selectAllBtn.onclick = function(e) {
+                e.stopPropagation();
+                selectAllTableCells(table);
+            };
+            table.appendChild(selectAllBtn);
+            
             // Add table controls
             const controls = document.createElement('div');
             controls.className = 'table-controls';
@@ -6379,14 +6462,42 @@
             table.classList.add('selected');
         }
         
-        function selectTableCell(cell) {
-            // Remove previous selection
-            cell.closest('table').querySelectorAll('td').forEach(td => {
-                td.classList.remove('selected-cell');
+        function selectTableCell(cell, addToSelection = false) {
+            if (!addToSelection) {
+                // Remove previous selection
+                cell.closest('table').querySelectorAll('td').forEach(td => {
+                    td.classList.remove('selected-cell');
+                    td.classList.remove('multi-selected');
+                });
+                // Select this cell
+                cell.classList.add('selected-cell');
+            } else {
+                // Add to selection (multi-select)
+                if (cell.classList.contains('selected-cell') || cell.classList.contains('multi-selected')) {
+                    cell.classList.remove('selected-cell');
+                    cell.classList.remove('multi-selected');
+                } else {
+                    cell.classList.add('multi-selected');
+                }
+            }
+        }
+        
+        // Select all cells in table
+        function selectAllTableCells(table) {
+            const cells = table.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+                if (index === 0) {
+                    cell.classList.add('selected-cell');
+                } else {
+                    cell.classList.add('multi-selected');
+                }
             });
-            
-            // Select this cell
-            cell.classList.add('selected-cell');
+            showToast('모든 셀이 선택되었습니다');
+        }
+        
+        // Get selected cells
+        function getSelectedTableCells(table) {
+            return table.querySelectorAll('td.selected-cell, td.multi-selected');
         }
         
         function addTableRow(btn) {
