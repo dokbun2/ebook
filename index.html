@@ -1115,6 +1115,63 @@
             color: white;
         }
 
+        /* Text Orientation Buttons */
+        .orientation-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .orientation-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .orientation-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        /* Vertical Text Style */
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.1em;
+            line-height: 1.6;
+            text-align: left;
+        }
+        
+        .vertical-text p,
+        .vertical-text div {
+            margin-bottom: 0;
+            margin-right: 1em;
+        }
+        
+        /* For inline vertical text blocks */
+        div.vertical-text {
+            display: inline-block;
+            vertical-align: top;
+            margin: 0 10px;
+            padding: 10px;
+            border-left: 2px solid transparent;
+        }
+        
+        div.vertical-text:hover {
+            border-left: 2px solid #e0e0e0;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
         /* Color Picker */
         .color-group {
             display: flex;
@@ -2266,6 +2323,16 @@
                             </button>
                         </div>
 
+                        <!-- Text Orientation (Horizontal/Vertical) -->
+                        <div class="text-orientation-group" style="margin-top: 12px; display: flex; gap: 4px;">
+                            <button class="orientation-btn active" onclick="setTextOrientation('horizontal')" title="가로 쓰기" style="flex: 1;">
+                                <i class="fas fa-arrows-alt-h"></i> 가로
+                            </button>
+                            <button class="orientation-btn" onclick="setTextOrientation('vertical')" title="세로 쓰기" style="flex: 1;">
+                                <i class="fas fa-arrows-alt-v"></i> 세로
+                            </button>
+                        </div>
+
                         <!-- Text and Background Colors -->
                         <div class="color-controls-row">
                             <div class="color-control-item">
@@ -3163,6 +3230,87 @@
                 btn.classList.remove('active');
             });
             event.target.closest('.align-btn').classList.add('active');
+        }
+
+        // Set text orientation (horizontal/vertical)
+        function setTextOrientation(orientation) {
+            const editorContent = getActiveEditorContent();
+            if (!editorContent) {
+                showToast('에디터를 선택해주세요');
+                return;
+            }
+
+            const selection = window.getSelection();
+            
+            if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                // Apply to selected text
+                const range = selection.getRangeAt(0);
+                const selectedContent = range.extractContents();
+                
+                const wrapper = document.createElement('div');
+                if (orientation === 'vertical') {
+                    wrapper.className = 'vertical-text';
+                    wrapper.style.writingMode = 'vertical-rl';
+                    wrapper.style.textOrientation = 'upright';
+                    wrapper.style.letterSpacing = '0.1em';
+                    wrapper.style.display = 'inline-block';
+                    wrapper.style.minHeight = '200px';
+                } else {
+                    wrapper.style.writingMode = 'horizontal-tb';
+                    wrapper.style.textOrientation = 'mixed';
+                    wrapper.style.display = 'inline';
+                }
+                
+                wrapper.appendChild(selectedContent);
+                range.insertNode(wrapper);
+                
+                // Clear selection
+                selection.removeAllRanges();
+            } else {
+                // Apply to whole editor or current paragraph
+                const currentNode = selection.anchorNode;
+                const paragraph = currentNode ? 
+                    (currentNode.nodeType === Node.TEXT_NODE ? currentNode.parentElement : currentNode) :
+                    editorContent;
+                
+                if (paragraph && paragraph !== editorContent) {
+                    // Apply to current paragraph
+                    if (orientation === 'vertical') {
+                        paragraph.classList.add('vertical-text');
+                        paragraph.style.writingMode = 'vertical-rl';
+                        paragraph.style.textOrientation = 'upright';
+                        paragraph.style.letterSpacing = '0.1em';
+                        paragraph.style.minHeight = '200px';
+                    } else {
+                        paragraph.classList.remove('vertical-text');
+                        paragraph.style.writingMode = '';
+                        paragraph.style.textOrientation = '';
+                        paragraph.style.letterSpacing = '';
+                        paragraph.style.minHeight = '';
+                    }
+                } else {
+                    // Apply to whole editor
+                    if (orientation === 'vertical') {
+                        editorContent.classList.add('vertical-text');
+                        editorContent.style.writingMode = 'vertical-rl';
+                        editorContent.style.textOrientation = 'upright';
+                        editorContent.style.letterSpacing = '0.1em';
+                    } else {
+                        editorContent.classList.remove('vertical-text');
+                        editorContent.style.writingMode = '';
+                        editorContent.style.textOrientation = '';
+                        editorContent.style.letterSpacing = '';
+                    }
+                }
+            }
+            
+            // Update active button
+            document.querySelectorAll('.orientation-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.orientation-btn').classList.add('active');
+            
+            showToast(`텍스트 방향이 ${orientation === 'vertical' ? '세로' : '가로'}로 변경되었습니다`);
         }
 
         // Insert list
