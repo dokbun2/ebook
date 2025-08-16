@@ -1590,17 +1590,20 @@
         .ad-wrapper {
             background: white;
             border-radius: 8px;
-            padding: 15px;
+            padding: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 336px;
-            height: 280px; /* 336x280 대형 직사각형 */
-            overflow: hidden;
+            width: 356px; /* 336px + 20px padding */
+            min-height: 300px; /* 280px + 20px padding */
+            overflow: visible;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         
         .ad-wrapper .adsbygoogle {
-            width: 306px; /* 336px - 30px padding */
-            height: 250px; /* 280px - 30px padding */
+            width: 336px;
+            height: 280px;
             display: block;
         }
         
@@ -3906,16 +3909,12 @@
             if (!selectedEmojis.includes(emoji)) {
                 selectedEmojis.push(emoji);
                 updateSelectedDisplay();
-                console.log('Added emoji:', emoji, 'Total:', selectedEmojis.length);
-            } else {
-                console.log('Emoji already selected:', emoji);
             }
         }
         
         // Update selected emoji display
         function updateSelectedDisplay() {
             const display = document.getElementById('selectedEmojiDisplay');
-            console.log('Updating display, selected emojis:', selectedEmojis);
             if (display) {
                 if (selectedEmojis.length === 0) {
                     display.innerHTML = '<span style="color: #999; font-size: 12px;">선택된 이모티콘이 없습니다</span>';
@@ -3924,8 +3923,6 @@
                         `<span style="font-size: 20px; cursor: pointer; margin: 2px;" onclick="removeEmoji('${emoji}')" title="클릭하여 제거">${emoji}</span>`
                     ).join('');
                 }
-            } else {
-                console.error('selectedEmojiDisplay element not found');
             }
         }
         
@@ -4762,7 +4759,6 @@
                     
                     showToast(`페이지 ${i + 1}/${pages.length} 처리 중...`);
                 } catch (error) {
-                    console.error(`페이지 ${i + 1} 렌더링 오류:`, error);
                     showToast(`페이지 ${i + 1} 렌더링 실패`);
                 }
             }
@@ -7609,8 +7605,8 @@
                  style="display:block"
                  data-ad-client="ca-pub-3297361889610977"
                  data-ad-slot="8487350672"
-                 data-ad-format="rectangle"
-                 data-full-width-responsive="false"></ins>
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
         </div>
         
         <!-- Bottom Ad (336x280 Large Rectangle) -->
@@ -7619,8 +7615,8 @@
                  style="display:block"
                  data-ad-client="ca-pub-3297361889610977"
                  data-ad-slot="8487350672"
-                 data-ad-format="rectangle"
-                 data-full-width-responsive="false"></ins>
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
         </div>
     </div>
     
@@ -7628,9 +7624,17 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3297361889610977"
          crossorigin="anonymous"></script>
     <script>
-        // Initialize ads
-        (adsbygoogle = window.adsbygoogle || []).push({});
-        (adsbygoogle = window.adsbygoogle || []).push({});
+        // Initialize ads when page loads
+        window.addEventListener('load', function() {
+            try {
+                // Initialize first ad
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                // Initialize second ad
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {
+                console.log('AdSense initialization error:', e);
+            }
+        });
     </script>
 </body>
 </html>
