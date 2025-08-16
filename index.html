@@ -2632,11 +2632,49 @@
         let uploadedImages = [];
         let resizing = false;
         let resizeData = null;
+        let activeEditorContent = null; // Track the currently active editor
 
         // Initialize
         function initDocument() {
             updatePageNumbers();
             setupEventListeners();
+            setupEditorFocusTracking();
+        }
+
+        // Setup focus tracking for editor content
+        function setupEditorFocusTracking() {
+            // Set initial active editor
+            activeEditorContent = document.querySelector('.editor-content');
+            
+            // Add focus tracking to existing editors
+            document.addEventListener('focusin', function(e) {
+                if (e.target.closest('.editor-content')) {
+                    activeEditorContent = e.target.closest('.editor-content');
+                }
+            });
+            
+            // Also track click events for better reliability
+            document.addEventListener('click', function(e) {
+                const editorContent = e.target.closest('.editor-content');
+                if (editorContent) {
+                    activeEditorContent = editorContent;
+                }
+            });
+        }
+
+        // Get the currently active editor content
+        function getActiveEditorContent() {
+            // If no active editor is tracked, try to find the focused one
+            if (!activeEditorContent) {
+                const focused = document.activeElement;
+                if (focused && focused.closest('.editor-content')) {
+                    activeEditorContent = focused.closest('.editor-content');
+                } else {
+                    // Default to first editor if none is focused
+                    activeEditorContent = document.querySelector('.editor-content');
+                }
+            }
+            return activeEditorContent;
         }
 
         // Setup event listeners
@@ -3703,8 +3741,12 @@
             galleryItem.addEventListener('dblclick', function() {
                 const image = uploadedImages.find(img => img.id === imageId);
                 if (image) {
-                    // Focus on the editor
-                    const editorContent = document.querySelector('.editor-content');
+                    // Get the active editor
+                    const editorContent = getActiveEditorContent();
+                    if (!editorContent) {
+                        showToast('에디터를 선택해주세요');
+                        return;
+                    }
                     editorContent.focus();
                     
                     // Place cursor at the end
@@ -3754,9 +3796,15 @@
             imageContainer.className = 'image-container';
             imageContainer.style.width = '200px'; // Default width
             
+            // Get the active editor
+            const editorContent = getActiveEditorContent();
+            if (!editorContent) {
+                showToast('에디터를 선택해주세요');
+                return;
+            }
+            
             // Position at cursor or default position
             if (x && y) {
-                const editorContent = document.querySelector('.editor-content');
                 const rect = editorContent.getBoundingClientRect();
                 imageContainer.style.left = (x - rect.left) + 'px';
                 imageContainer.style.top = (y - rect.top) + 'px';
@@ -3848,7 +3896,6 @@
             });
             
             // Add to editor content
-            const editorContent = document.querySelector('.editor-content');
             editorContent.appendChild(imageContainer);
             
             showToast('이미지가 추가되었습니다');
@@ -4148,6 +4195,13 @@
             const addButton = document.querySelector('.add-page-btn');
             addButton.parentNode.insertBefore(newPage, addButton);
             
+            // Set the new page's editor as active
+            const newEditorContent = newPage.querySelector('.editor-content');
+            if (newEditorContent) {
+                activeEditorContent = newEditorContent;
+                newEditorContent.focus();
+            }
+            
             newPage.scrollIntoView({ behavior: 'smooth', block: 'center' });
             showToast('새 페이지가 추가되었습니다');
         }
@@ -4377,28 +4431,63 @@
             
             const pages = document.querySelectorAll('.page');
             
+            // Ensure all pages are visible before capturing
+            const originalDisplay = [];
+            pages.forEach((page, index) => {
+                originalDisplay[index] = page.style.display;
+                page.style.display = 'block';
+            });
+            
             for (let i = 0; i < pages.length; i++) {
                 if (i > 0) {
                     pdf.addPage();
                 }
                 
                 try {
+                    // Make sure the page is visible and properly sized
+                    pages[i].style.display = 'block';
+                    
+                    // Wait a moment for the page to render
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
                     const canvas = await html2canvas(pages[i], {
                         scale: 2,
                         useCORS: true,
                         allowTaint: true,
-                        backgroundColor: '#ffffff'
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        windowWidth: pages[i].scrollWidth,
+                        windowHeight: pages[i].scrollHeight
                     });
                     
                     const imgData = canvas.toDataURL('image/png');
                     const imgWidth = 210; // A4 width in mm
+                    const pageHeight = 297; // A4 height in mm
                     const imgHeight = (canvas.height * imgWidth) / canvas.width;
                     
-                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    // If content is taller than one page, scale it to fit
+                    if (imgHeight > pageHeight) {
+                        const scaledWidth = (pageHeight * canvas.width) / canvas.height;
+                        const scaledHeight = pageHeight;
+                        const xOffset = (210 - scaledWidth) / 2;
+                        pdf.addImage(imgData, 'PNG', xOffset, 0, scaledWidth, scaledHeight);
+                    } else {
+                        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    }
+                    
+                    showToast(`페이지 ${i + 1}/${pages.length} 처리 중...`);
                 } catch (error) {
-                    console.error('페이지 렌더링 오류:', error);
+                    console.error(`페이지 ${i + 1} 렌더링 오류:`, error);
+                    showToast(`페이지 ${i + 1} 렌더링 실패`);
                 }
             }
+            
+            // Restore original display settings
+            pages.forEach((page, index) => {
+                if (originalDisplay[index]) {
+                    page.style.display = originalDisplay[index];
+                }
+            });
             
             pdf.save(`${currentDocument.title}.pdf`);
             showToast('PDF가 다운로드되었습니다');
@@ -4535,7 +4624,13 @@
         
         // Add shape to editor
         function addShape(shapeType) {
-            const editorContent = document.querySelector('.editor-content');
+            // Get the active editor
+            const editorContent = getActiveEditorContent();
+            if (!editorContent) {
+                showToast('에디터를 선택해주세요');
+                return;
+            }
+            
             const shapeElement = document.createElement('div');
             shapeElement.className = 'shape-element';
             shapeElement.id = `shape-${++shapeIdCounter}`;
@@ -4737,7 +4832,12 @@
         
         // Insert shape to content
         function insertShapeToContent(shape) {
-            const editorContent = document.querySelector('.editor-content');
+            // Get the active editor
+            const editorContent = getActiveEditorContent();
+            if (!editorContent) {
+                showToast('에디터를 선택해주세요');
+                return;
+            }
             
             // SVG나 아이콘 내용 복사
             const svgElement = shape.querySelector('svg');
@@ -4799,7 +4899,12 @@
         function pasteShape() {
             if (!copiedShape) return;
             
-            const editorContent = document.querySelector('.editor-content');
+            // Get the active editor
+            const editorContent = getActiveEditorContent();
+            if (!editorContent) {
+                showToast('에디터를 선택해주세요');
+                return;
+            }
             
             // 도형 복제
             const newShape = copiedShape.cloneNode(true);
@@ -5818,7 +5923,13 @@
                 return;
             }
             
-            const editorContent = document.querySelector('.editor-content');
+            // Get the active editor
+            const editorContent = getActiveEditorContent();
+            if (!editorContent) {
+                showToast('에디터를 선택해주세요');
+                return;
+            }
+            
             const table = document.createElement('table');
             table.className = 'draggable-table';
             table.id = `table-${++tableIdCounter}`;
