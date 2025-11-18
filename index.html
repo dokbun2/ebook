@@ -1780,32 +1780,107 @@
         
         /* Print styles */
         @media print {
+            /* 페이지 여백 제거 */
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+
             .landscape .page {
                 size: A4 landscape;
             }
-            
+
             .page {
-                size: A4 portrait;
                 page-break-after: always;
                 box-shadow: none;
-                margin: 0;
+                margin: 0 !important;
+                padding: 40px 60px !important;
+                position: relative !important;
+                width: 210mm !important;
+                min-height: 297mm !important;
+                max-width: 210mm !important;
+                border-radius: 0 !important;
             }
-            
+
+            /* 헤더, 사이드바, 버튼 숨기기 */
             .header,
             .icon-sidebar,
             .tool-sidebar,
-            .btn {
+            .btn,
+            .add-page-btn,
+            .page-number {
                 display: none !important;
             }
-            
+
+            /* 컨테이너 여백 제거 */
             .app-container {
-                padding: 0;
+                padding: 0 !important;
+                margin: 0 !important;
             }
-            
+
             .editor-wrapper {
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
+            }
+
+            .scroll-container {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* 편집 가능 영역 */
+            .editor-content {
+                position: relative !important;
+                min-height: auto !important;
+            }
+
+            /* 텍스트 섹션과 이미지 위치 유지 */
+            .text-section {
+                position: absolute !important;
+                page-break-inside: avoid;
+                padding: 8px !important;
+            }
+
+            .image-container {
+                position: absolute !important;
+                page-break-inside: avoid;
+            }
+
+            .image-container img {
+                max-width: 100% !important;
+                height: auto !important;
+                display: block;
+            }
+
+            /* 편집 컨트롤 숨기기 */
+            .text-controls,
+            .drag-handle,
+            .resize-handles,
+            .image-controls,
+            .resize-handle,
+            .image-upload-area {
+                display: none !important;
+            }
+
+            /* 선택 표시 제거 */
+            .text-section.selected,
+            .image-container.selected,
+            .shape-element.selected {
+                outline: none !important;
+                background: transparent !important;
+            }
+
+            /* 이미지가 페이지를 벗어나지 않도록 */
+            img {
+                page-break-inside: avoid;
             }
         }
 
@@ -2483,6 +2558,16 @@
             height: 1px;
             background: var(--border-color);
             margin: 4px 0;
+        }
+
+        /* 이미지 전용 옵션 기본적으로 숨김 */
+        .context-menu .image-only-option {
+            display: none;
+        }
+
+        /* 이미지 컨텍스트 메뉴일 때 표시 */
+        .context-menu.image-context .image-only-option {
+            display: block;
         }
 
         /* Toast */
@@ -3236,6 +3321,11 @@
             <i class="fas fa-level-down-alt"></i>
             <span>뒤로 보내기</span>
         </div>
+        <div class="context-menu-divider image-only-option"></div>
+        <div class="context-menu-item image-only-option" onclick="toggleRoundedCorners()">
+            <i class="fas fa-border-style"></i>
+            <span>모서리 둥글게</span>
+        </div>
     </div>
 
     <script>
@@ -3283,7 +3373,7 @@
                         hideContextMenu();
                     }
                 }
-            });
+            }, true); // capture phase에서 실행
 
             // 컨텍스트 메뉴 기본 우클릭 방지
             document.addEventListener('contextmenu', function(e) {
@@ -3625,6 +3715,16 @@
             const contextMenu = document.getElementById('contextMenu');
             contextMenuTarget = element;
 
+            // 이미지인지 텍스트인지 확인
+            const isImage = element.classList.contains('image-container');
+
+            // 이미지 컨텍스트인 경우 클래스 추가
+            if (isImage) {
+                contextMenu.classList.add('image-context');
+            } else {
+                contextMenu.classList.remove('image-context');
+            }
+
             // 메뉴 위치 설정
             contextMenu.style.left = event.pageX + 'px';
             contextMenu.style.top = event.pageY + 'px';
@@ -3635,6 +3735,7 @@
         function hideContextMenu() {
             const contextMenu = document.getElementById('contextMenu');
             contextMenu.classList.remove('show');
+            contextMenu.classList.remove('image-context');
         }
 
         // Bring to front (맨 앞으로)
@@ -3699,6 +3800,30 @@
 
             hideContextMenu();
             showToast('뒤로 보냈습니다');
+        }
+
+        // Toggle rounded corners (이미지 모서리 둥글게)
+        function toggleRoundedCorners() {
+            if (!contextMenuTarget) return;
+            if (!contextMenuTarget.classList.contains('image-container')) return;
+
+            const img = contextMenuTarget.querySelector('img');
+            if (!img) return;
+
+            // 현재 border-radius 값 확인
+            const currentRadius = img.style.borderRadius || '0px';
+
+            // 둥글게/각지게 토글
+            if (currentRadius === '0px' || currentRadius === '') {
+                img.style.borderRadius = '12px';
+                showToast('모서리를 둥글게 만들었습니다');
+            } else {
+                img.style.borderRadius = '0px';
+                showToast('모서리를 각지게 만들었습니다');
+            }
+
+            hideContextMenu();
+            autoSaveToLocalStorage();
         }
 
         // ==================== END CONTEXT MENU ====================
@@ -5575,8 +5700,26 @@
         // Save document
         function saveDocument() {
             const pages = Array.from(document.querySelectorAll('.page')).map(page => {
+                // 텍스트 섹션 데이터 수집
+                const textSections = Array.from(page.querySelectorAll('.text-section')).map(section => {
+                    const style = section.style;
+                    return {
+                        content: section.querySelector('.text-content').innerHTML,
+                        type: section.querySelector('.text-content').tagName.toLowerCase(),
+                        position: {
+                            left: style.left,
+                            top: style.top,
+                            width: style.width,
+                            height: style.height
+                        },
+                        zIndex: style.zIndex || 'auto'
+                    };
+                });
+
+                // 이미지 컨테이너 데이터는 이미 content에 포함되어 있음
                 return {
-                    content: page.querySelector('.editor-content').innerHTML
+                    content: page.querySelector('.editor-content').innerHTML,
+                    textSections: textSections
                 };
             });
 
@@ -5584,12 +5727,12 @@
 
             const dataStr = JSON.stringify(currentDocument, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
+
             const link = document.createElement('a');
             link.href = URL.createObjectURL(dataBlob);
             link.download = `${currentDocument.title}.json`;
             link.click();
-            
+
             showToast('문서가 저장되었습니다');
         }
 
@@ -5620,14 +5763,23 @@
         function loadDocumentData(data) {
             currentDocument = data;
             // Title is now stored in currentDocument but not displayed in search field
-            
+
             // Remove existing pages except first
             document.querySelectorAll('.page:not(:first-child)').forEach(page => page.remove());
-            
+
             // Update first page or create pages
             if (data.pages.length > 0) {
-                document.querySelector('.page .editor-content').innerHTML = data.pages[0].content;
-                
+                const firstPage = document.querySelector('.page');
+                firstPage.querySelector('.editor-content').innerHTML = data.pages[0].content;
+
+                // 첫 번째 페이지의 이미지 이벤트 리스너 복원
+                restoreImageEventListeners(firstPage);
+
+                // 첫 번째 페이지의 텍스트 섹션 복원
+                if (data.pages[0].textSections) {
+                    restoreTextSections(firstPage, data.pages[0].textSections);
+                }
+
                 // Add remaining pages
                 for (let i = 1; i < data.pages.length; i++) {
                     pageCounter++;
@@ -5635,9 +5787,9 @@
                     newPage.className = 'page';
                     newPage.id = `page${pageCounter}`;
                     newPage.innerHTML = `
-                        <div class="editor-content" contenteditable="true" 
-                             onpaste="handlePaste(event)" 
-                             ondrop="handleDrop(event)" 
+                        <div class="editor-content" contenteditable="true"
+                             onpaste="handlePaste(event)"
+                             ondrop="handleDrop(event)"
                              ondragover="handleDragOver(event)"
                              ondragenter="handleDragEnter(event)"
                              oninput="updateContent()">
@@ -5645,83 +5797,163 @@
                         </div>
                         <div class="page-number">${pageCounter}</div>
                     `;
-                    
+
                     const addButton = document.querySelector('.add-page-btn');
                     addButton.parentNode.insertBefore(newPage, addButton);
+
+                    // 이미지 이벤트 리스너 복원
+                    restoreImageEventListeners(newPage);
+
+                    // 텍스트 섹션 복원
+                    if (data.pages[i].textSections) {
+                        restoreTextSections(newPage, data.pages[i].textSections);
+                    }
                 }
             }
-            
+
             updatePageNumbers();
+        }
+
+        // 텍스트 섹션 복원 함수
+        function restoreTextSections(page, textSections) {
+            textSections.forEach(sectionData => {
+                const section = document.createElement('div');
+                section.className = 'text-section';
+                section.style.left = sectionData.position.left;
+                section.style.top = sectionData.position.top;
+                section.style.width = sectionData.position.width;
+                section.style.height = sectionData.position.height;
+                section.style.zIndex = sectionData.zIndex;
+
+                // 텍스트 컨텐츠 생성
+                const textContent = document.createElement('div');
+                textContent.className = 'text-content';
+                textContent.contentEditable = 'true';
+
+                const textElement = document.createElement(sectionData.type);
+                textElement.innerHTML = sectionData.content;
+                textContent.appendChild(textElement);
+
+                // 드래그 핸들 추가
+                const dragHandle = document.createElement('div');
+                dragHandle.className = 'drag-handle';
+                dragHandle.innerHTML = '<i class="fas fa-grip-vertical"></i>';
+                dragHandle.title = '드래그하여 이동';
+
+                // 컨트롤 버튼 추가
+                const controls = document.createElement('div');
+                controls.className = 'text-controls';
+                controls.innerHTML = `
+                    <button class="btn btn-sm" onclick="deleteTextSection(this)" title="삭제" style="padding: 4px 8px; font-size: 11px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+
+                // 리사이즈 핸들 추가
+                const resizeHandles = createResizeHandles();
+
+                section.appendChild(dragHandle);
+                section.appendChild(textContent);
+                section.appendChild(controls);
+                section.appendChild(resizeHandles);
+
+                // 페이지에 추가
+                page.appendChild(section);
+
+                // 드래그 기능 추가
+                makeTextSectionDraggable(section);
+
+                // 리사이즈 기능 추가
+                makeTextSectionResizable(section);
+
+                // 컨테이너 클릭 시 선택 (텍스트 영역 제외)
+                section.addEventListener('mousedown', function(e) {
+                    e.stopPropagation();
+                    if (e.target.closest('.text-content')) {
+                        selectTextSection(section);
+                    }
+                });
+
+                // 클릭 이벤트에도 전파 차단
+                section.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectTextSection(section);
+                });
+
+                // 우클릭 컨텍스트 메뉴
+                section.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    showContextMenu(e, section);
+                });
+            });
+        }
+
+        // 이미지 이벤트 리스너 복원 함수
+        function restoreImageEventListeners(page) {
+            const imageContainers = page.querySelectorAll('.image-container');
+            imageContainers.forEach(imageContainer => {
+                // Add click event
+                imageContainer.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('resize-handle') && !e.target.closest('.image-control-btn')) {
+                        selectImage(this);
+                    }
+                });
+
+                // 우클릭 컨텍스트 메뉴
+                imageContainer.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    selectImage(this);
+                    showContextMenu(e, imageContainer);
+                });
+
+                // Add drag functionality
+                imageContainer.addEventListener('mousedown', function(e) {
+                    if (e.target.classList.contains('resize-handle') || e.target.closest('.image-control-btn')) {
+                        return;
+                    }
+
+                    e.preventDefault();
+                    selectImage(this);
+
+                    const startX = e.clientX;
+                    const startY = e.clientY;
+                    const startLeft = parseInt(this.style.left) || 0;
+                    const startTop = parseInt(this.style.top) || 0;
+                    const container = this;
+
+                    container.classList.add('dragging');
+
+                    function handleMouseMove(e) {
+                        const deltaX = e.clientX - startX;
+                        const deltaY = e.clientY - startY;
+
+                        container.style.left = (startLeft + deltaX) + 'px';
+                        container.style.top = (startTop + deltaY) + 'px';
+                        container.style.transform = 'none'; // Remove any transform
+                    }
+
+                    function handleMouseUp() {
+                        container.classList.remove('dragging');
+                        document.removeEventListener('mousemove', handleMouseMove);
+                        document.removeEventListener('mouseup', handleMouseUp);
+                    }
+
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+
+                // Add resize event listeners
+                const handles = imageContainer.querySelectorAll('.resize-handle');
+                handles.forEach(handle => {
+                    handle.addEventListener('mousedown', startResize);
+                });
+            });
         }
 
         // Export to PDF
         async function exportToPDF() {
-            showToast('PDF를 생성하고 있습니다...');
-            
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            
-            const pages = document.querySelectorAll('.page');
-            
-            // Ensure all pages are visible before capturing
-            const originalDisplay = [];
-            pages.forEach((page, index) => {
-                originalDisplay[index] = page.style.display;
-                page.style.display = 'block';
-            });
-            
-            for (let i = 0; i < pages.length; i++) {
-                if (i > 0) {
-                    pdf.addPage();
-                }
-                
-                try {
-                    // Make sure the page is visible and properly sized
-                    pages[i].style.display = 'block';
-                    
-                    // Wait a moment for the page to render
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    
-                    const canvas = await html2canvas(pages[i], {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: true,
-                        backgroundColor: '#ffffff',
-                        logging: false,
-                        windowWidth: pages[i].scrollWidth,
-                        windowHeight: pages[i].scrollHeight
-                    });
-                    
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgWidth = 210; // A4 width in mm
-                    const pageHeight = 297; // A4 height in mm
-                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                    
-                    // If content is taller than one page, scale it to fit
-                    if (imgHeight > pageHeight) {
-                        const scaledWidth = (pageHeight * canvas.width) / canvas.height;
-                        const scaledHeight = pageHeight;
-                        const xOffset = (210 - scaledWidth) / 2;
-                        pdf.addImage(imgData, 'PNG', xOffset, 0, scaledWidth, scaledHeight);
-                    } else {
-                        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                    }
-                    
-                    showToast(`페이지 ${i + 1}/${pages.length} 처리 중...`);
-                } catch (error) {
-                    showToast(`페이지 ${i + 1} 렌더링 실패`);
-                }
-            }
-            
-            // Restore original display settings
-            pages.forEach((page, index) => {
-                if (originalDisplay[index]) {
-                    page.style.display = originalDisplay[index];
-                }
-            });
-            
-            pdf.save(`${currentDocument.title}.pdf`);
-            showToast('PDF가 다운로드되었습니다');
+            // 브라우저 인쇄 기능 사용 (더 나은 품질과 레이아웃)
+            window.print();
         }
 
         // Update color code display when color picker changes
