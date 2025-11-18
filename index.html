@@ -1817,7 +1817,7 @@
             padding: 40px 60px;
             min-height: 1056px; /* A4 height at 96 DPI */
             border-radius: var(--radius-sm);
-            position: relative;
+            position: relative; /* 텍스트 섹션의 절대 위치 기준점 */
         }
 
         .page-number {
@@ -1835,6 +1835,26 @@
             line-height: 1.8;
             color: var(--text-primary);
             position: relative;
+        }
+
+        /* Placeholder style for empty editor */
+        .editor-content:empty:before {
+            content: attr(data-placeholder);
+            color: #adb5bd;
+            font-style: italic;
+            pointer-events: none;
+        }
+
+        /* Waiting for click mode */
+        .editor-content.waiting-for-click {
+            outline: 2px dashed var(--accent-primary);
+            outline-offset: -2px;
+            background: rgba(13, 110, 253, 0.03);
+            cursor: crosshair !important;
+        }
+
+        .editor-content.waiting-for-click * {
+            cursor: crosshair !important;
         }
 
         .editor-content h1 {
@@ -2249,18 +2269,145 @@
             color: var(--text-tertiary);
         }
         
+        /* Text Section in Editor */
+        .text-section {
+            position: absolute;
+            cursor: default;
+            user-select: text;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            transition: outline 0.2s ease, background 0.2s ease;
+            min-width: 150px;
+            max-width: 600px;
+            box-sizing: border-box;
+            pointer-events: auto; /* 클릭 이벤트 활성화 */
+        }
+
+        /* 선택된 상태에서만 이동 가능 */
+        .text-section.selected {
+            cursor: move;
+            outline: 2px dashed var(--accent-primary);
+            outline-offset: 2px;
+            background: rgba(13, 110, 253, 0.02);
+        }
+
+        /* 드래그 핸들 */
+        .text-section .drag-handle {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            background: var(--accent-primary);
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: move;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .text-section .drag-handle i {
+            color: white;
+            font-size: 12px;
+        }
+
+        .text-section.selected .drag-handle {
+            display: flex;
+        }
+
+        /* 텍스트 편집 영역은 항상 선택 가능 */
+        .text-section .text-content {
+            user-select: text;
+            cursor: text;
+            outline: none;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        /* 텍스트 타입별 스타일 */
+        .text-section .text-content h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .text-section .text-content h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .text-section .text-content h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .text-section .text-content p {
+            font-size: 16px;
+            font-weight: 400;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .text-section.dragging {
+            opacity: 0.8;
+            z-index: 1000;
+            cursor: grabbing !important;
+        }
+
+        .text-section.dragging .text-content {
+            user-select: none;
+            cursor: grabbing !important;
+        }
+
+        .text-section .text-controls {
+            position: absolute;
+            top: -32px;
+            right: 0;
+            display: none;
+            gap: 4px;
+            background: white;
+            padding: 4px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        /* 선택된 상태에서만 컨트롤 표시 */
+        .text-section.selected .text-controls {
+            display: flex;
+        }
+
+        .text-section .resize-handles {
+            display: none;
+        }
+
+        .text-section.selected .resize-handles {
+            display: block;
+        }
+
         /* Shape in Editor */
         .shape-element {
             position: absolute;
             cursor: move;
             user-select: none;
         }
-        
+
         .shape-element.selected {
             outline: 2px solid var(--accent-primary);
             outline-offset: 2px;
         }
-        
+
         .shape-element.dragging {
             opacity: 0.8;
             z-index: 1000;
@@ -2295,6 +2442,49 @@
             height: 20px !important;
         }
         
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            padding: 4px 0;
+            min-width: 180px;
+            z-index: 3000;
+            display: none;
+        }
+
+        .context-menu.show {
+            display: block;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: background 0.15s ease;
+        }
+
+        .context-menu-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .context-menu-item i {
+            width: 16px;
+            color: var(--text-secondary);
+        }
+
+        .context-menu-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 4px 0;
+        }
+
         /* Toast */
         .toast {
             position: fixed;
@@ -2435,19 +2625,19 @@
         
         <!-- Left Icon Sidebar -->
         <div class="icon-sidebar">
-            <button class="icon-btn active" onclick="showPanel('text')" title="텍스트">
+            <button class="icon-btn active" onclick="showPanel('text', this)" title="텍스트">
                 <i class="fas fa-font"></i>
                 <span class="icon-tooltip">텍스트</span>
             </button>
-            <button class="icon-btn" onclick="showPanel('upload')" title="업로드">
+            <button class="icon-btn" onclick="showPanel('upload', this)" title="업로드">
                 <i class="fas fa-upload"></i>
                 <span class="icon-tooltip">업로드</span>
             </button>
-            <button class="icon-btn" onclick="showPanel('elements')" title="요소">
+            <button class="icon-btn" onclick="showPanel('elements', this)" title="요소">
                 <i class="fas fa-shapes"></i>
                 <span class="icon-tooltip">요소</span>
             </button>
-            <button class="icon-btn" onclick="showPanel('pages')" title="페이지">
+            <button class="icon-btn" onclick="showPanel('pages', this)" title="페이지">
                 <i class="fas fa-file-alt"></i>
                 <span class="icon-tooltip">페이지</span>
             </button>
@@ -2459,6 +2649,28 @@
             
             <!-- Text Panel -->
             <div id="textPanel" class="panel">
+                <!-- 텍스트 추가 섹션 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="section-title">텍스트 추가</span>
+                        <i class="fas fa-chevron-down section-toggle"></i>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label class="form-label">텍스트 타입</label>
+                            <select class="form-control" id="textTypeSelect">
+                                <option value="h1">제목 (대)</option>
+                                <option value="h2">제목 (중)</option>
+                                <option value="h3">제목 (소)</option>
+                                <option value="p" selected>본문</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="insertTextFromDropdown()">
+                            <i class="fas fa-plus"></i> 텍스트 추가
+                        </button>
+                    </div>
+                </div>
+
                 <!-- 텍스트 서식 섹션 -->
                 <div class="sidebar-section">
                     <div class="section-header" onclick="toggleSection(this)">
@@ -2989,14 +3201,13 @@
         <main class="editor-container">
             <div class="editor-wrapper">
                 <div class="page" id="page1">
-                    <div class="editor-content" contenteditable="true" 
-                         onpaste="handlePaste(event)" 
-                         ondrop="handleDrop(event)" 
+                    <div class="editor-content" contenteditable="true"
+                         onpaste="handlePaste(event)"
+                         ondrop="handleDrop(event)"
                          ondragover="handleDragOver(event)"
                          ondragenter="handleDragEnter(event)"
-                         oninput="updateContent()">
-                        <h1>제목을 입력해주세요.</h1>
-                        <p>여기에 내용을 작성하세요.</p>
+                         oninput="updateContent()"
+                         data-placeholder="클릭하여 텍스트를 입력하거나, 왼쪽 패널의 버튼을 클릭하여 텍스트를 추가하세요.">
                     </div>
                     <div class="page-number">1</div>
                 </div>
@@ -3005,6 +3216,27 @@
     </div>
 
     <input type="file" id="fileInput" class="file-input" accept=".json" onchange="loadDocument(this)">
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" onclick="bringToFront()">
+            <i class="fas fa-arrow-up"></i>
+            <span>맨 앞으로 가져오기</span>
+        </div>
+        <div class="context-menu-item" onclick="sendToBack()">
+            <i class="fas fa-arrow-down"></i>
+            <span>맨 뒤로 보내기</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" onclick="bringForward()">
+            <i class="fas fa-level-up-alt"></i>
+            <span>앞으로 가져오기</span>
+        </div>
+        <div class="context-menu-item" onclick="sendBackward()">
+            <i class="fas fa-level-down-alt"></i>
+            <span>뒤로 보내기</span>
+        </div>
+    </div>
 
     <script>
         let currentDocument = {
@@ -3024,6 +3256,8 @@
         let resizing = false;
         let resizeData = null;
         let activeEditorContent = null; // Track the currently active editor
+        let pendingTextInsert = null; // Track pending text insertion {tag, text}
+        let contextMenuTarget = null; // Track element for context menu
 
         // Initialize
         function initDocument() {
@@ -3031,7 +3265,7 @@
             setupEventListeners();
             setupEditorFocusTracking();
             generatePageThumbnails();
-            
+
             // Add scroll event listener for thumbnail highlighting
             const scrollContainer = document.querySelector('.editor-wrapper')?.parentElement;
             if (scrollContainer) {
@@ -3039,26 +3273,86 @@
                     updateActiveThumbnail();
                 });
             }
+
+            // 컨텍스트 메뉴 외부 클릭 시 닫기
+            document.addEventListener('click', function(e) {
+                const contextMenu = document.getElementById('contextMenu');
+                // 메뉴가 열려있고, 메뉴 외부를 클릭한 경우에만 닫기
+                if (contextMenu && contextMenu.classList.contains('show')) {
+                    if (!e.target.closest('#contextMenu')) {
+                        hideContextMenu();
+                    }
+                }
+            });
+
+            // 컨텍스트 메뉴 기본 우클릭 방지
+            document.addEventListener('contextmenu', function(e) {
+                // 텍스트 섹션이나 이미지가 아닌 경우 기본 메뉴 표시
+                if (!e.target.closest('.text-section') && !e.target.closest('.image-container')) {
+                    // 기본 브라우저 컨텍스트 메뉴는 허용하지 않음
+                    // hideContextMenu();
+                }
+            });
+
+            // 자동 저장 복원 (페이지 로드 후 약간의 지연)
+            setTimeout(() => {
+                restoreFromLocalStorage();
+            }, 500);
         }
 
         // Setup focus tracking for editor content
         function setupEditorFocusTracking() {
             // Set initial active editor
             activeEditorContent = document.querySelector('.editor-content');
-            
+
             // Add focus tracking to existing editors
             document.addEventListener('focusin', function(e) {
                 if (e.target.closest('.editor-content')) {
                     activeEditorContent = e.target.closest('.editor-content');
                 }
             });
-            
+
             // Also track click events for better reliability
             document.addEventListener('click', function(e) {
                 const editorContent = e.target.closest('.editor-content');
+                const textSection = e.target.closest('.text-section');
+                const page = e.target.closest('.page');
+
                 if (editorContent) {
                     activeEditorContent = editorContent;
+
+                    // 대기 중인 텍스트 삽입이 있으면 실행
+                    if (pendingTextInsert) {
+                        performTextInsertion(editorContent, e);
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
                 }
+
+                // 페이지 빈 곳 클릭 시 모든 선택 해제
+                if (page && !textSection && !e.target.closest('.text-controls') && !pendingTextInsert) {
+                    deselectAllTextSections();
+                }
+            });
+
+            // ESC 키로 대기 모드 취소 또는 선택 해제
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (pendingTextInsert) {
+                        clearPendingTextInsert();
+                        showToast('텍스트 추가가 취소되었습니다');
+                    } else {
+                        deselectAllTextSections();
+                    }
+                }
+            });
+        }
+
+        // Deselect all text sections
+        function deselectAllTextSections() {
+            document.querySelectorAll('.text-section').forEach(s => {
+                s.classList.remove('selected');
             });
         }
 
@@ -3075,6 +3369,350 @@
                 }
             }
             return activeEditorContent;
+        }
+
+        // Insert text from dropdown selection
+        function insertTextFromDropdown() {
+            const select = document.getElementById('textTypeSelect');
+            const tag = select.value;
+
+            const textMap = {
+                'h1': '제목을 입력하세요',
+                'h2': '부제목을 입력하세요',
+                'h3': '소제목을 입력하세요',
+                'p': '본문 내용을 입력하세요'
+            };
+
+            const text = textMap[tag] || '텍스트를 입력하세요';
+            insertTextAtCursor(tag, text);
+        }
+
+        // Prepare text insertion - wait for user to click on editor
+        function insertTextAtCursor(tag, text) {
+            // 대기 모드로 전환
+            pendingTextInsert = { tag, text };
+
+            // 모든 에디터에 대기 모드 스타일 추가
+            document.querySelectorAll('.editor-content').forEach(editor => {
+                editor.classList.add('waiting-for-click');
+            });
+
+            // 안내 메시지 표시
+            showToast('텍스트를 추가할 위치를 클릭하세요', 'info');
+
+            // 커서 스타일 변경
+            document.body.style.cursor = 'crosshair';
+        }
+
+        // Actually insert text at clicked position
+        function performTextInsertion(editorContent, event) {
+            if (!pendingTextInsert) return;
+
+            const { tag, text } = pendingTextInsert;
+
+            // 에디터의 상대 위치 계산
+            const editorRect = editorContent.getBoundingClientRect();
+            const page = editorContent.closest('.page');
+            const pageRect = page.getBoundingClientRect();
+
+            const x = event.clientX - pageRect.left;
+            const y = event.clientY - pageRect.top;
+
+            // 텍스트 섹션 컨테이너 생성
+            const textSection = document.createElement('div');
+            textSection.className = 'text-section';
+            textSection.style.left = x + 'px';
+            textSection.style.top = y + 'px';
+            textSection.style.zIndex = '10'; // 기본 z-index
+
+            // 텍스트 콘텐츠 생성
+            const textContent = document.createElement('div');
+            textContent.className = 'text-content';
+            textContent.contentEditable = 'true';
+
+            const textElement = document.createElement(tag);
+            textElement.textContent = text;
+            textContent.appendChild(textElement);
+
+            // 드래그 핸들 추가
+            const dragHandle = document.createElement('div');
+            dragHandle.className = 'drag-handle';
+            dragHandle.innerHTML = '<i class="fas fa-grip-vertical"></i>';
+            dragHandle.title = '드래그하여 이동';
+
+            // 컨트롤 버튼 추가
+            const controls = document.createElement('div');
+            controls.className = 'text-controls';
+            controls.innerHTML = `
+                <button class="btn btn-sm" onclick="deleteTextSection(this)" title="삭제" style="padding: 4px 8px; font-size: 11px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+
+            // 리사이즈 핸들 추가
+            const resizeHandles = createResizeHandles();
+
+            textSection.appendChild(dragHandle);
+            textSection.appendChild(textContent);
+            textSection.appendChild(controls);
+            textSection.appendChild(resizeHandles);
+
+            // 페이지에 추가
+            page.appendChild(textSection);
+
+            // 드래그 기능 추가
+            makeTextSectionDraggable(textSection);
+
+            // 리사이즈 기능 추가
+            makeTextSectionResizable(textSection);
+
+            // 컨테이너 클릭 시 선택 (텍스트 영역 제외)
+            textSection.addEventListener('mousedown', function(e) {
+                // 텍스트 섹션 클릭 시 이벤트 전파 차단 (겹친 이미지로 전파 방지)
+                e.stopPropagation();
+
+                // 텍스트 편집 영역 클릭 시에는 선택만
+                if (e.target.closest('.text-content')) {
+                    selectTextSection(textSection);
+                }
+            });
+
+            // 클릭 이벤트에도 전파 차단
+            textSection.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectTextSection(textSection);
+            });
+
+            // 우클릭 컨텍스트 메뉴
+            textSection.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showContextMenu(e, textSection);
+            });
+
+            // 대기 모드 해제
+            clearPendingTextInsert();
+
+            // 자동 선택
+            selectTextSection(textSection);
+
+            updateContent();
+
+            // 토스트 메시지
+            const toastMessages = {
+                'h1': '제목 (대)이 추가되었습니다',
+                'h2': '제목 (중)이 추가되었습니다',
+                'h3': '제목 (소)이 추가되었습니다',
+                'p': '본문이 추가되었습니다'
+            };
+            showToast(toastMessages[tag] || '텍스트가 추가되었습니다');
+        }
+
+        // Clear pending text insert state
+        function clearPendingTextInsert() {
+            pendingTextInsert = null;
+            document.querySelectorAll('.editor-content').forEach(editor => {
+                editor.classList.remove('waiting-for-click');
+            });
+            document.body.style.cursor = '';
+        }
+
+        // Make text section draggable
+        function makeTextSectionDraggable(textSection) {
+            let isDragging = false;
+            const dragHandle = textSection.querySelector('.drag-handle');
+
+            // 드래그 핸들에만 드래그 이벤트 추가
+            dragHandle.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                selectTextSection(textSection);
+
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startLeft = parseInt(textSection.style.left) || 0;
+                const startTop = parseInt(textSection.style.top) || 0;
+
+                textSection.classList.add('dragging');
+                isDragging = false;
+
+                function handleMouseMove(e) {
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+
+                    // 최소 이동 거리를 확인하여 드래그 여부 판단
+                    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                        isDragging = true;
+                    }
+
+                    textSection.style.left = (startLeft + deltaX) + 'px';
+                    textSection.style.top = (startTop + deltaY) + 'px';
+                }
+
+                function handleMouseUp() {
+                    textSection.classList.remove('dragging');
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+            });
+        }
+
+        // Make text section resizable
+        function makeTextSectionResizable(textSection) {
+            const handles = textSection.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const section = textSection;
+                    const startX = e.clientX;
+                    const startY = e.clientY;
+                    const startWidth = section.offsetWidth;
+                    const startHeight = section.offsetHeight;
+                    const handleClass = this.className;
+
+                    function handleMouseMove(e) {
+                        const deltaX = e.clientX - startX;
+                        const deltaY = e.clientY - startY;
+
+                        if (handleClass.includes('right')) {
+                            section.style.width = Math.max(150, startWidth + deltaX) + 'px';
+                        }
+                        if (handleClass.includes('bottom')) {
+                            section.style.height = Math.max(50, startHeight + deltaY) + 'px';
+                        }
+                    }
+
+                    function handleMouseUp() {
+                        document.removeEventListener('mousemove', handleMouseMove);
+                        document.removeEventListener('mouseup', handleMouseUp);
+                    }
+
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+            });
+        }
+
+        // Select text section
+        function selectTextSection(section) {
+            document.querySelectorAll('.text-section').forEach(s => {
+                s.classList.remove('selected');
+            });
+            section.classList.add('selected');
+
+            // 텍스트 패널 자동 표시
+            showPanel('text');
+        }
+
+        // Delete text section
+        function deleteTextSection(btn) {
+            const section = btn.closest('.text-section');
+            if (section) {
+                section.remove();
+                showToast('텍스트가 삭제되었습니다');
+                updateContent();
+            }
+        }
+
+        // ==================== CONTEXT MENU & Z-INDEX FUNCTIONS ====================
+
+        // Show context menu
+        function showContextMenu(event, element) {
+            const contextMenu = document.getElementById('contextMenu');
+            contextMenuTarget = element;
+
+            // 메뉴 위치 설정
+            contextMenu.style.left = event.pageX + 'px';
+            contextMenu.style.top = event.pageY + 'px';
+            contextMenu.classList.add('show');
+        }
+
+        // Hide context menu
+        function hideContextMenu() {
+            const contextMenu = document.getElementById('contextMenu');
+            contextMenu.classList.remove('show');
+        }
+
+        // Bring to front (맨 앞으로)
+        function bringToFront() {
+            if (!contextMenuTarget) return;
+
+            const page = contextMenuTarget.closest('.page');
+            const allElements = page.querySelectorAll('.text-section, .image-container');
+
+            // 모든 요소의 z-index 가져오기
+            let maxZ = 0;
+            allElements.forEach(el => {
+                const z = parseInt(el.style.zIndex) || 1;
+                if (z > maxZ) maxZ = z;
+            });
+
+            // 선택된 요소를 최상위로
+            contextMenuTarget.style.zIndex = maxZ + 1;
+
+            hideContextMenu();
+            showToast('맨 앞으로 가져왔습니다');
+        }
+
+        // Send to back (맨 뒤로)
+        function sendToBack() {
+            if (!contextMenuTarget) return;
+
+            const page = contextMenuTarget.closest('.page');
+            const allElements = page.querySelectorAll('.text-section, .image-container');
+
+            // 모든 요소의 z-index 가져오기
+            let minZ = 999999;
+            allElements.forEach(el => {
+                const z = parseInt(el.style.zIndex) || 1;
+                if (z < minZ) minZ = z;
+            });
+
+            // 선택된 요소를 최하위로
+            contextMenuTarget.style.zIndex = minZ - 1;
+
+            hideContextMenu();
+            showToast('맨 뒤로 보냈습니다');
+        }
+
+        // Bring forward (한 단계 앞으로)
+        function bringForward() {
+            if (!contextMenuTarget) return;
+
+            const currentZ = parseInt(contextMenuTarget.style.zIndex) || 1;
+            contextMenuTarget.style.zIndex = currentZ + 1;
+
+            hideContextMenu();
+            showToast('앞으로 가져왔습니다');
+        }
+
+        // Send backward (한 단계 뒤로)
+        function sendBackward() {
+            if (!contextMenuTarget) return;
+
+            const currentZ = parseInt(contextMenuTarget.style.zIndex) || 1;
+            contextMenuTarget.style.zIndex = Math.max(1, currentZ - 1);
+
+            hideContextMenu();
+            showToast('뒤로 보냈습니다');
+        }
+
+        // ==================== END CONTEXT MENU ====================
+
+        // Create resize handles
+        function createResizeHandles() {
+            const resizeHandles = document.createElement('div');
+            resizeHandles.className = 'resize-handles';
+            resizeHandles.innerHTML = `
+                <div class="resize-handle resize-handle-right" style="position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 40px; background: var(--accent-primary); cursor: ew-resize; border-radius: 4px;"></div>
+                <div class="resize-handle resize-handle-bottom" style="position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); height: 8px; width: 40px; background: var(--accent-primary); cursor: ns-resize; border-radius: 4px;"></div>
+                <div class="resize-handle resize-handle-bottom-right" style="position: absolute; right: -4px; bottom: -4px; width: 12px; height: 12px; background: var(--accent-primary); cursor: nwse-resize; border-radius: 50%;"></div>
+            `;
+            return resizeHandles;
         }
 
         // Setup event listeners
@@ -3187,12 +3825,24 @@
         }
 
         // Show panel
-        function showPanel(panelName) {
+        function showPanel(panelName, triggerElement) {
             // Update active button
             document.querySelectorAll('.icon-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.closest('.icon-btn').classList.add('active');
+
+            // 버튼이 있으면 활성화, 없으면 패널 이름으로 찾기
+            if (triggerElement) {
+                triggerElement.closest('.icon-btn').classList.add('active');
+            } else {
+                // 패널 이름에 해당하는 버튼 찾아서 활성화
+                const buttons = document.querySelectorAll('.icon-btn');
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('onclick')?.includes(`'${panelName}'`)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
 
             // Hide all panels
             document.querySelectorAll('.panel').forEach(panel => {
@@ -3215,6 +3865,9 @@
             if (window.innerWidth <= 1024) {
                 document.getElementById('toolSidebar').classList.add('open');
             }
+
+            // 현재 패널 저장
+            currentPanel = panelName;
         }
 
         // Toggle section
@@ -4270,6 +4923,7 @@
             const imageContainer = document.createElement('div');
             imageContainer.className = 'image-container';
             imageContainer.style.width = '200px'; // Default width
+            imageContainer.style.zIndex = '5'; // 기본 z-index (텍스트보다 낮음)
             
             // Get the active editor
             const editorContent = getActiveEditorContent();
@@ -4327,6 +4981,13 @@
                     selectImage(this);
                 }
             });
+
+            // 우클릭 컨텍스트 메뉴
+            imageContainer.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                selectImage(this);
+                showContextMenu(e, imageContainer);
+            });
             
             // Add drag functionality
             imageContainer.addEventListener('mousedown', function(e) {
@@ -4381,9 +5042,12 @@
             document.querySelectorAll('.image-container').forEach(c => {
                 c.classList.remove('selected');
             });
-            
+
             container.classList.add('selected');
             selectedImage = container;
+
+            // 업로드 패널 자동 표시
+            showPanel('upload');
         }
 
         // Start resize
@@ -4454,11 +5118,14 @@
             // Minimum size
             newWidth = Math.max(50, newWidth);
             newHeight = Math.max(50, newHeight);
-            
-            // Maximum size (container width)
-            const maxWidth = resizeData.container.parentElement.offsetWidth - 120; // padding
-            newWidth = Math.min(maxWidth, newWidth);
-            
+
+            // Maximum size - 페이지 전체 너비까지 허용 (제한 제거)
+            const page = resizeData.container.closest('.page');
+            if (page) {
+                const maxWidth = page.offsetWidth; // 페이지 전체 너비
+                newWidth = Math.min(maxWidth, newWidth);
+            }
+
             resizeData.container.style.width = newWidth + 'px';
             if (resizeData.handle !== 'left' && resizeData.handle !== 'right') {
                 resizeData.container.style.height = newHeight + 'px';
@@ -5147,8 +5814,9 @@
 
         // Update content
         function updateContent() {
-            // Auto-save logic can be added here
-            
+            // Auto-save to localStorage
+            autoSaveToLocalStorage();
+
             // Update thumbnails after content changes (with debounce)
             if (window.thumbnailUpdateTimeout) {
                 clearTimeout(window.thumbnailUpdateTimeout);
@@ -5156,6 +5824,99 @@
             window.thumbnailUpdateTimeout = setTimeout(() => {
                 generatePageThumbnails();
             }, 1000);
+        }
+
+        // Auto-save to localStorage
+        function autoSaveToLocalStorage() {
+            if (window.autoSaveTimeout) {
+                clearTimeout(window.autoSaveTimeout);
+            }
+
+            window.autoSaveTimeout = setTimeout(() => {
+                try {
+                    const pages = document.querySelectorAll('.page');
+                    const savedData = {
+                        timestamp: Date.now(),
+                        pages: []
+                    };
+
+                    pages.forEach((page, index) => {
+                        const pageData = {
+                            id: page.id,
+                            html: page.innerHTML
+                        };
+                        savedData.pages.push(pageData);
+                    });
+
+                    localStorage.setItem('ebook_autosave', JSON.stringify(savedData));
+                    console.log('자동 저장됨:', new Date().toLocaleTimeString());
+                } catch (e) {
+                    console.error('자동 저장 실패:', e);
+                }
+            }, 2000); // 2초 디바운스
+        }
+
+        // Restore from localStorage
+        function restoreFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('ebook_autosave');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    const savedDate = new Date(data.timestamp);
+
+                    // 사용자에게 복원할지 물어보기
+                    if (confirm(`마지막 자동 저장 시간: ${savedDate.toLocaleString()}\n\n저장된 내용을 복원하시겠습니까?`)) {
+                        data.pages.forEach((pageData, index) => {
+                            const page = document.getElementById(pageData.id);
+                            if (page) {
+                                page.innerHTML = pageData.html;
+
+                                // 이벤트 리스너 재등록
+                                const textSections = page.querySelectorAll('.text-section');
+                                textSections.forEach(section => {
+                                    makeTextSectionDraggable(section);
+                                    makeTextSectionResizable(section);
+
+                                    section.addEventListener('contextmenu', function(e) {
+                                        e.preventDefault();
+                                        showContextMenu(e, section);
+                                    });
+
+                                    section.addEventListener('click', function(e) {
+                                        e.stopPropagation();
+                                        selectTextSection(section);
+                                    });
+                                });
+
+                                // 이미지 컨테이너 이벤트 재등록
+                                const imageContainers = page.querySelectorAll('.image-container');
+                                imageContainers.forEach(container => {
+                                    container.addEventListener('click', function(e) {
+                                        if (!e.target.classList.contains('resize-handle') && !e.target.closest('.image-control-btn')) {
+                                            selectImage(this);
+                                        }
+                                    });
+
+                                    container.addEventListener('contextmenu', function(e) {
+                                        e.preventDefault();
+                                        selectImage(this);
+                                        showContextMenu(e, container);
+                                    });
+
+                                    const handles = container.querySelectorAll('.resize-handle');
+                                    handles.forEach(handle => {
+                                        handle.addEventListener('mousedown', startResize);
+                                    });
+                                });
+                            }
+                        });
+
+                        showToast('저장된 내용을 복원했습니다');
+                    }
+                }
+            } catch (e) {
+                console.error('복원 실패:', e);
+            }
         }
         
         // ==================== SHAPE FUNCTIONS ====================
